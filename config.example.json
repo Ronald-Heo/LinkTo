@@ -1,0 +1,14 @@
+{
+  "db": {
+    "host": "localhost",
+    "database": "linkto",
+    "username": null,
+    "password": null,
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 10000
+    },
+    "logging": false
+  }
+}
