@@ -1,9 +1,17 @@
-var express = require('express');
-var router = express.Router();
+'use strict';
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'LinkTo' });
+const acl = require('../middleweares/acl');
+const template = require('../common/template');
+const Router = require('./router');
+
+const router = Router.createRouter();
+
+router.get('/', [acl.needsAdminLogin], () => {
+  return template.render('index', { title: 'LinkTo' });
 });
 
-module.exports = router;
+router.get('/admin', [acl.needsAdminLogin], () => {
+  return template.render('admin', { title: 'Admin' });
+});
+
+module.exports = router.expressRouter();
