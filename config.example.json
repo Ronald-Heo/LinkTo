@@ -10,5 +10,9 @@
       "idle": 10000
     },
     "logging": false
+  },
+  "admin": {
+    "id": null,
+    "pw": null
   }
 }
