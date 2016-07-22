@@ -11,6 +11,7 @@ import webpack from 'gulp-webpack';
 import webpackConfig from './webpack.config.js';
 
 import cleanCSS from 'gulp-clean-css';
+import sass from 'gulp-sass';
 import htmlmin from 'gulp-htmlmin';
 import imagemin from 'gulp-imagemin';
 import del from 'del';
@@ -23,9 +24,9 @@ const DIR = {
 };
  
 const SRC = {
-    JS: DIR.SRC + '/js/*.js',
-    CSS: DIR.SRC + '/css/*.css',
-    HTML: DIR.SRC + '/*.html',
+    JS: DIR.SRC + '/js/**/*.js',
+    CSS: DIR.SRC + '/css/**/*.scss',
+    HTML: DIR.SRC + '/js/templates/*.html',
     IMAGES: DIR.SRC + '/images/*',
     SERVER: 'server/**/*.js'
 };
@@ -58,8 +59,8 @@ gulp.task('js', () => {
 
 gulp.task('css', () => {
     return gulp.src(SRC.CSS)
-           .pipe(cleanCSS({compatibility: 'ie8'}))
-           .pipe(gulp.dest(DEST.CSS));
+    		.pipe(sass().on('error', sass.logError))
+			.pipe(gulp.dest(DEST.CSS));
 });
 
 gulp.task('html', () => {
