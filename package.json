@@ -29,6 +29,13 @@
     "gulp-webpack": "^1.5.0"
   },
   "dependencies": {
-    "express": "^4.14.0"
+    "angular": "^1.5.8",
+    "angular-resource": "^1.5.8",
+    "angular-ui-bootstrap": "^2.0.0",
+    "angular-ui-router": "^0.3.1",
+    "angular-ui-router-title": "0.0.4",
+    "express": "^4.14.0",
+    "glob": "^7.0.5",
+    "lodash": "^4.13.1"
   }
 }
