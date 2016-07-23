@@ -4,9 +4,6 @@ import angular from 'angular';
 import angularUiRouterTitle from 'angular-ui-router-title';
 import angularUiRouter from 'angular-ui-router';
 
-console.log(angularUiRouterTitle);
-console.log(angularUiRouter);
-
 const routes = angular.module('routes', [
 	'ui.router.title',
 	angularUiRouter
@@ -23,6 +20,16 @@ routes.config(['$stateProvider', '$urlRouterProvider', ($stateProvider, $urlRout
 	      },
 		  templateUrl: 'intro.html',
 		  controller: 'HeaderController as vm'
+	    });
+
+	$stateProvider
+	    .state('dashboard', {
+	      url: '/dashboard',
+	      resolve: {
+	        
+	      },
+		  templateUrl: 'dashboard.html',
+		  controller: 'DashboardController as vm'
 	    });
 
 	$stateProvider

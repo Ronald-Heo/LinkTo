@@ -2,12 +2,28 @@
 <html ng-app="app">
 	<head>
 		<meta charset="UTF-8">
-		<title>Hi</title>
-
+		
+		<link rel="stylesheet" type="text/css" href="./css/style.css">
 		<base href="/"/>
+
+		<title ng-bind="($title ? $title + ' - ' : '') + defaultPageTitle">
 	</head>
 	 
 	<body>
+		<header>
+			<nav class="navbar navbar-inverse navbar-fixed-top">
+				<div class="container-fluid">
+		        <a id="navbar-brand" href='/'>LinkTo</a>
+			        <ul class="nav navbar-nav navbar-right">
+			          <li><a>Dashboard</a></li>
+			          <li><a>Setting</a></li>
+			          <li><a>Help</a></li>
+			        </ul>
+				</div>
+			</nav>
+		</header>
+		<a ui-sref='intro'>intro</a>
+		<a ui-sref='dashboard'>dashboard</a>
 		<ui-view></ui-view>
 		<script src = './js/bundle.js'></script>
 	</body>

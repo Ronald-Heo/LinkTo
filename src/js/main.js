@@ -7,8 +7,6 @@ import routes from './modules/routes.js';
 import services from './modules/services.js';
 import templates from './modules/templates.js';
 
-console.log(routes.name);
-
 const app = angular.module('app', [
 	controllers.name,
 	models.name,
