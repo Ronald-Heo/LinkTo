@@ -1,22 +1,45 @@
 {
-  "name": "LinkTo",
-  "version": "0.0.0",
-  "private": true,
+  "name": "linkto",
+  "version": "1.0.0",
+  "description": "데이터 시각화 프로젝트",
+  "main": "index.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "linkto"
+  ],
   "author": "lanace93",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.11.4",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.9.0",
+    "browser-sync": "^2.13.0",
+    "del": "^2.2.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-clean-css": "^2.0.11",
+    "gulp-file-cache": "0.0.1",
+    "gulp-htmlmin": "^2.0.0",
+    "gulp-imagemin": "^3.0.2",
+    "gulp-nodemon": "^2.1.0",
+    "gulp-sass": "^2.3.2",
+    "gulp-util": "^3.0.7",
+    "gulp-webpack": "^1.5.0"
+  },
   "dependencies": {
-    "body-parser": "~1.13.2",
-    "cookie-parser": "~1.3.5",
-    "csv": "^1.1.0",
+    "angular": "^1.5.8",
+    "angular-nvd3": "^1.0.8",
+    "angular-resource": "^1.5.8",
+    "angular-ui-bootstrap": "^2.0.0",
+    "angular-ui-router": "^0.3.1",
+    "angular-ui-router-title": "0.0.4",
+    "bootstrap": "^3.3.7",
     "csv-parser": "^1.9.3",
-    "debug": "~2.2.0",
-    "express": "~4.13.1",
-    "jade": "~1.11.0",
-    "morgan": "~1.6.1",
-    "mysql": "^2.11.1",
-    "serve-favicon": "~2.3.0"
+    "express": "^4.14.0",
+    "glob": "^7.0.5",
+    "lodash": "^4.13.1",
+    "mysql": "^2.11.1"
   }
 }

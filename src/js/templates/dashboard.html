@@ -1,0 +1,56 @@
+<section id="dashboard">
+	
+	<div id="content-dashboard">
+		<header>
+			<h3 id="header-title" class="h3">Delayed Coke Unit</h3>
+			<div id="table-selector">
+				<select id="category-select" class="form-control" ng-model="vm.selectedCategory" ng-options="category for category in vm.category track by category">
+				</select>
+				<input id="category-field" class="form-control" type="text" >
+			</div>
+		</header>
+
+		<nvd3 id="graph" options="vm.graph.options" data="vm.graph.data"></nvd3>	
+	</div>
+	<div id="side-menu">
+		<div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox" ng-click="vm.call()">SP</label>
+			</div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox" ng-click="vm.getController()">CO</label>
+			</div>	
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox">PV</label>
+			</div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox">P</label>
+			</div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox">I</label>
+			</div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox">D</label>
+			</div>
+		</div>
+
+		<div>
+			<h4 class="h4">Current Value</h4>
+			<pre>
+				<label>PV: <span ng-bind="vm.current.pv"></span></label><br/>
+				<label>SP: <span ng-bind="vm.current.sp"></span></label><br/>
+				<label>CO: <span ng-bind="vm.current.co"></span></label><br/>
+				<label>P: <span ng-bind="vm.current.p"></span></label><br/>
+				<label>I: <span ng-bind="vm.current.i"></span></label><br/>
+				<label>D: <span ng-bind="vm.current.d"></span></label><br/>
+			</pre>
+		</div>
+
+		<div>
+			<button type="button" class="btn btn-primary btn-menu">재생</button>
+			<button type="button" class="btn btn-danger btn-menu">일시정지</button>
+			<button type="button" class="btn btn-default btn-menu">Import</button>
+			<button type="button" class="btn btn-default btn-menu">Export</button>
+		</div>
+	</div>
+</section>

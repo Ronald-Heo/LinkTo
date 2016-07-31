@@ -1,0 +1,42 @@
+#dashboard {
+	#content-dashboard {
+		width: 80%;
+		display: inline-block;
+		padding: 6px;
+
+		#header-title {
+			display: inline;
+		}
+
+		#graph {
+			margin: 16px;
+		}
+
+		#table-selector {
+			display: inline;
+			float: right;
+		}
+
+		#category-select {
+			width: 35%;
+			margin: 3px;
+			display: inline;
+		}
+
+		#category-field {
+			width: 55%;
+			margin: 3px;
+			display: inline;
+		}
+	}
+
+	#side-menu {
+		float: right;
+		width: 20%;
+		padding: 6px;
+
+		.btn-menu {
+			margin: 6px;
+		}
+	}
+}

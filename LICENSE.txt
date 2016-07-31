@@ -1,5 +1,0 @@
-Copyright (C) 2016 Lanace
-All rights reserved.
-
-This project can not be used, copied and/or distributed
-without the express permission of Lanace.

@@ -1,0 +1,29 @@
+<section>
+	<header>
+		<h3>계정 설정</h3>
+	</header>
+
+	<div>
+		<div>
+			<label>사용자 명</label>
+			<span ng-bind="vm.admin.name"></span>
+		</div>
+		<div>
+			<label>현재 비밀번호</label>
+			<input type="password" class="form-controller">
+		</div>
+		<div>
+			<label>변경 후 비밀번호</label>
+			<input type="password" class="form-controller">
+		</div>
+		<div>
+			<label>변경 후 비밀번호 확인</label>
+			<input type="password" class="form-controller">
+		</div>
+	</div>
+
+	<div>
+		<button type="button" class="btn btn-primary">변경</button>
+		<button type="button" class="btn btn-danger">계정 삭제</button>
+	</div>
+</section>
