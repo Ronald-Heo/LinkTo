@@ -18,7 +18,7 @@ exports.select = (table, name, timestamp) => {
 };
 
 exports.select2 = () => {
-	var query = conn.query(`SELECT * from fic001`, function(err, rows, fields) {
+	var query = conn.query(`SELECT * from fic002`, function(err, rows, fields) {
 		if (err)
 			throw err;
 	});
