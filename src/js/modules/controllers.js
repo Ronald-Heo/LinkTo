@@ -37,11 +37,42 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
         options: {},
         data: {}
     };
+    vm.playList;
 
     $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
                 .then((response) => {
                     vm.category = response.data;
                 });
+
+    vm.play = () => {
+        console.log('play');
+        vm.playList = setInterval(function() {
+                console.log('aaa');
+            }, 3000);
+    };
+
+    vm.stop = () => {
+        console.log('stop');
+        if (vm.playList)
+            clearInterval(vm.playList);
+    }
+
+    vm.export = () => {
+        console.log('export');
+        // TODO Export
+        var defaultFileName = 'export.csv';
+        var type = 'application/vnd.ms-excel;charset=charset=utf-8';
+
+        var data = JSON.stringify(vm.graph.data);
+        console.log(data);
+        var blob = new Blob([data], { type: type });
+        FileSaver.saveAs(blob, defaultFileName);
+    }
+
+    vm.import = () => {
+        console.log('import');
+        // TODO Import
+    }
 
     vm.getController = () => {
         $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
