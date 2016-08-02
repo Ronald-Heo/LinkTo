@@ -26,7 +26,7 @@ router.get('/controller', (req, res) => {
             category.ItemID = category.ItemID.split('.')[1].replace('\n"', '').replace('\"', ''); // TODO 잘못된 데이터가 듫어가 있어서 임의로 삽입한 코드
             return category;
         });
-
+        
         res.send(_.groupBy(result, 'ItemID'));
     });
 	}
