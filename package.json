@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "angular": "^1.5.8",
+    "angular-file-saver": "^1.1.2",
     "angular-nvd3": "^1.0.8",
     "angular-resource": "^1.5.8",
     "angular-ui-bootstrap": "^2.0.0",

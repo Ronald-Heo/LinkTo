@@ -26,12 +26,6 @@ routes.config(['$stateProvider', '$urlRouterProvider', ($stateProvider, $urlRout
 	    .state('dashboard', {
 	      url: '/dashboard',
 	      resolve: {
-	      	option() {
-	      		return 'zzz';
-	      	},
-	      	data() {
-	      		return 'test';	
-	      	}
 	      },
 		  templateUrl: 'dashboard.html',
 		  controller: 'DashboardController as vm'

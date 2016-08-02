@@ -5,10 +5,12 @@ import angular from 'angular';
 import angularNvd3 from 'angular-nvd3';
 import config from '../../config';
 import d3 from 'd3';
+import FileSaver from 'angular-file-saver'
 import nvd3 from 'nvd3';
 
 const controllers = angular.module('controllers', [
-	'nvd3'
+	'nvd3',
+    FileSaver
 ]);
 
 controllers.controller('HeaderController', function(){
@@ -29,7 +31,7 @@ controllers.controller('DBListController', function(){
     const vm = this;
 });
 
-controllers.controller('DashboardController', ['$http', 'option', function($http, option){
+controllers.controller('DashboardController', ['$http', 'FileSaver', function($http, FileSaver){
 	const vm = this;
 
     vm.category = [];
@@ -135,7 +137,7 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
 
 	vm.graph.options = {
             chart: {
-                type: 'lineChart',
+                type: 'lineWithFocusChart',
                 height: 450,
                 margin : {
                     top: 20,
@@ -145,7 +147,7 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                 },
                 x: function(d){ 
                     var date = new Date(d.ItemTimeStamp);
-                    return date.getTime() / 1000;
+                    return d.ItemTimeStamp;
                 },
                 y: function(d){ 
                     return d.ItemCurrentValue;
@@ -160,7 +162,7 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                 xAxis: {
                     axisLabel: 'Time'
                     // tickFormat: function(d) { 
-                    //     return d3.time.format('%Y-%m-%d')(new Date(d)); 
+                    //     return d3.time.format('%B %Y')(new Date(d)); 
                     // }
                 },
                 yAxis: {
