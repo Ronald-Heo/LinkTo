@@ -15,6 +15,15 @@ router.get('/', (req, res) => {
     res.send(controllers.select2());
 });
  
+router.get('/getTableName', (req, res) => {
+    controllers.getTableName(function(err, rows, fields) {
+        console.log(rows);
+        var result = _.map(rows, 'Tables_in_linkto');
+        res.send(result);
+    });
+});
+
+
 router.get('/getNameGroup', (req, res) => {
     controllers.getNameGroup(function(err, result) {
         

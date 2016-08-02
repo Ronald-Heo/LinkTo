@@ -2,7 +2,7 @@
 	
 	<div id="content-dashboard">
 		<header>
-			<h3 id="header-title" class="h3">Delayed Coke Unit</h3>
+			<h3 id="header-title" class="h3">{{vm.selectedCategory}}</h3>
 			<div id="table-selector">
 				<select id="category-select" class="form-control" ng-model="vm.selectedCategory" ng-options="category for category in vm.category track by category">
 				</select>
@@ -10,18 +10,21 @@
 			</div>
 		</header>
 
-		<nvd3 id="graph" options="vm.graph.options" data="vm.graph.data"></nvd3>	
+		<nvd3 id="graph" options="vm.graph.options" data="vm.graph.data"></nvd3>
 	</div>
 	<div id="side-menu">
 		<div>
+			<div>
+			<button type="button" class="btn btn-default btn-menu" ng-click="vm.callTable()" ng-click="vm.call()" ng-click="vm.getController()">그래프 확인</button>
+			</div>
 			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox" ng-click="vm.call()">SP</label>
+				<label><input type="checkbox" >SP</label>
 			</div>
 			<div class="checkbox-inline col-md-3">
 				<label><input type="checkbox" ng-click="vm.getController()">CO</label>
 			</div>	
 			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox">PV</label>
+				<label><input type="checkbox" >PV</label>
 			</div>
 			<div class="checkbox-inline col-md-3">
 				<label><input type="checkbox">P</label>

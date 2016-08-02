@@ -6,8 +6,13 @@ var conn = require('./index').conn;
 // import conn from './index';
 conn = conn.conn ? conn.conn : conn;
 
+exports.getTableName = (callback) => {
+	console.log(1);
+	conn.query('Show tables;', callback);
+};
+
 exports.getNameGroup = (callback) => {
-	conn.query('SELECT ItemID FROM linkto.fic001 group by ItemID;', callback);
+	conn.query('SELECT ItemID FROM linkto.tic002 group by ItemID;', callback);
 };
 
 exports.select = (table, name, timestamp) => {
@@ -18,7 +23,7 @@ exports.select = (table, name, timestamp) => {
 };
 
 exports.select2 = () => {
-	var query = conn.query(`SELECT * from fic002`, function(err, rows, fields) {
+	var query = conn.query(`SELECT * from tic002`, function(err, rows, fields) {
 		if (err)
 			throw err;
 	});
@@ -26,7 +31,7 @@ exports.select2 = () => {
 };
 
 exports.create = () => {
-	conn.query(`CREATE TABLE 'linkto'.'fic001' ('ItemID' VARCHAR(255) NULL,'ItemCurrentValue' VARCHAR(2000) NULL,'ItemTimeStamp' DATETIME NULL);`, function(err, rows, fields) {
+	conn.query(`CREATE TABLE 'linkto'.'tic002' ('ItemID' VARCHAR(255) NULL,'ItemCurrentValue' VARCHAR(2000) NULL,'ItemTimeStamp' DATETIME NULL);`, function(err, rows, fields) {
 		if (err){
 			console.log(err)
 			throw err;
@@ -35,7 +40,7 @@ exports.create = () => {
 };
 
 exports.insert = (controller) => {
-	var query = conn.query('Insert into fic001 set ?;', controller, function(err, result) {
+	var query = conn.query('Insert into tic002 set ?;', controller, function(err, result) {
 		if (err) {
 			throw err;
 		}
@@ -43,5 +48,5 @@ exports.insert = (controller) => {
 };
 
 exports.getControllerData = (callback) => {
-	var query = conn.query(`SELECT * FROM linkto.fic001 where ItemID LIKE '%FIC001%' order by ItemID, ItemTimeStamp`, callback);
+	var query = conn.query(`SELECT * FROM linkto.tic002 where ItemID LIKE '%tic002%' order by ItemID, ItemTimeStamp`, callback);
 };

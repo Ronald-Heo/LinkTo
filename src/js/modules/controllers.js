@@ -45,6 +45,15 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
             });
     };
 
+    vm.callTable = () => {
+        console.log(1);
+
+    };
+        $http.get("http://localhost:3001/apis/getTableName")
+            .then((response) => {
+                vm.category = response.data;
+            });
+
     vm.getController = () => {
         $http.get("http://localhost:3001/apis/controller")
             .then((response) => {
@@ -96,12 +105,12 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
 	vm.graph.options = {
             chart: {
                 type: 'lineChart',
-                height: 450,
+                height: 650,
                 margin : {
                     top: 20,
                     right: 20,
                     bottom: 40,
-                    left: 55
+                    left: 50
                 },
                 x: function(d){ 
                     //console.log(d3.time.format('%Y-%m-%d').parse(d.ItemTimeStamp));
@@ -109,7 +118,7 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                     if (d.ItemTimeStamp) {
                         var date = new Date(d.ItemTimeStamp);
                         // console.log(date.getTime());
-                        return date.getTime() / 1000;
+                        return date.getTime()/100;
                     } else {
                         return d.x;
                     }
@@ -123,6 +132,12 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                     }
                     // return d.ItemCurrentValue; 
                 },
+                "showDistX": true,
+                "showDistY": true,
+                "duration": 350,
+                "xAxis": {
+                  "axisLabel": "X Axis"
+                },
                 useInteractiveGuideline: false, // 여러개 한꺼본에 보이게 하는 옵션
                 dispatch: {
                     stateChange: function(e){ console.log("stateChange"); },
@@ -131,10 +146,10 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                     tooltipHide: function(e){ console.log("tooltipHide"); }
                 },
                 xAxis: {
-                    axisLabel: 'Time'
-                    // tickFormat: function(d) { 
-                    //     return d3.time.format('%Y-%m-%d')(new Date(d)); 
-                    // }
+                    axisLabel: 'Time',
+                    tickFormat: function(d) { 
+                        return d3.time.format('%H:%M:%S')(new Date(d));
+                    }
                 },
                 yAxis: {
                     axisLabel: 'Value',
@@ -146,6 +161,26 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                 callback: function(chart){
                     // 그래프 다 그린다음에 호출되는 Callback
                     console.log("lineChart callback 완료");
+                },
+
+                // chart 속성 마지막에 Zoom 기능 추가 
+                zoom: {
+                    //NOTE: All attributes below are optional
+                    enabled: true,
+                    scaleExtent: [1, 10],
+                    useFixedDomain: false,
+                    useNiceScale: false,
+                    horizontalOff: false,
+                    verticalOff: false,
+                    /*zoomed: function(xDomain, yDomain) {
+                        var domains = {x1: 0, x2: 0, y1: 100, y2: 100};
+                        return domains;
+                    },
+                    unzoomed: function(xDomain, yDomain) {
+                        var domains = {x1: 0, x2: 0, y1: 0, y2: 0};
+                        return domains;
+                    },*/
+                    unzoomEventType: 'dblclick.zoom'
                 }
             },
             title: {
@@ -165,22 +200,26 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
             },
         };
 
-        vm.graph.data = sinAndCos();
+        
+}]);
+
+export default controllers;
+//vm.graph.data = sinAndCos();
 
         /*Random Data Generator */
-        function sinAndCos() {
-            var sin = [],sin2 = [],
-                cos = [];
+      //  function sinAndCos() {
+       //     var sin = [],sin2 = [],
+        //        cos = [];
 
             //Data is represented as an array of {x,y} pairs.
-            for (var i = 0; i < 100; i++) {
+         /*   for (var i = 0; i < 100; i++) {
                 sin.push({x: i, y: Math.sin(i/10)});
                 sin2.push({x: i, y: i % 10 == 5 ? null : Math.sin(i/10) *0.25 + 0.5});
                 cos.push({x: i, y: .5 * Math.cos(i/10+ 2) + Math.random() / 10});
-            }
+            }*/
 
             //Line chart data should be sent as an array of series objects.
-            return [
+            /*return [
                 {
                     values: sin,      //values - represents the array of {x,y} data points
                     key: 'Sine Wave', //key  - the name of the series.
@@ -198,7 +237,4 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                     area: true      //area - set to true if you want this line to turn into a filled area chart.
                 }
             ];
-        };
-}]);
-
-export default controllers;
+        };*/
