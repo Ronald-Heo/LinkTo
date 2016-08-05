@@ -2,27 +2,23 @@
 
 const _ = require('lodash');
 var conn = require('./index').conn;
-// import _ from 'lodash';
-// import conn from './index';
 conn = conn.conn ? conn.conn : conn;
 
-exports.getNameGroup = (callback) => {
-	conn.query('SELECT ItemID FROM linkto.fic001 group by ItemID;', callback);
+exports.getTableGroup = (callback) => {
+	conn.query('show tables;', callback);
 };
+
+exports.getControllerData = (table, callback) => {
+	var query = conn.query(`SELECT * FROM ${table} order by ItemID, ItemTimeStamp`, callback);
+};
+
+// 기본 함수
 
 exports.select = (table, name, timestamp) => {
 	return conn.query(`SELECT * from '${table}' where name = '${name}' and timestamp = '${timestamp}'`, function(err, rows, fields) {
 		if (err)
 			throw err;
 	});
-};
-
-exports.select2 = () => {
-	var query = conn.query(`SELECT * from fic001`, function(err, rows, fields) {
-		if (err)
-			throw err;
-	});
-	return query;
 };
 
 exports.create = () => {
@@ -40,8 +36,4 @@ exports.insert = (controller) => {
 			throw err;
 		}
 	});
-};
-
-exports.getControllerData = (callback) => {
-	var query = conn.query(`SELECT * FROM linkto.fic001 where ItemID LIKE '%FIC001%' order by ItemID, ItemTimeStamp`, callback);
 };

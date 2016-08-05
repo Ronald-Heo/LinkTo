@@ -8,15 +8,11 @@ app.get('/hello', (req, res) => {
     return res.send('Can you hear me?');
 });
  
-import articles from './routes/articles';
 import apis from './routes/apis';
- 
-app.use('/articles', articles);
-app.use('/apis', apis);
+import users from './routes/users';
 
-// app.get('*', function(req, res){
-//   res.send('what???', 404);
-// });
+app.use('/apis', apis);
+app.use('/users', users);
 
 const server = app.listen(3001, () => {
     console.log('Express listening on port 3001');

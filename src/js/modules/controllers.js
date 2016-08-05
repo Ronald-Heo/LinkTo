@@ -3,9 +3,9 @@
 import _ from 'lodash';
 import angular from 'angular';
 import angularNvd3 from 'angular-nvd3';
+import config from '../../config';
 import d3 from 'd3';
 import nvd3 from 'nvd3';
-
 
 const controllers = angular.module('controllers', [
 	'nvd3'
@@ -38,16 +38,35 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
         data: {}
     };
 
-    vm.call = () => {
-        $http.get("http://localhost:3001/apis/getNameGroup")
-            .then((response) => {
-                vm.category = response.data;
-            });
-    };
+    $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
+                .then((response) => {
+                    vm.category = response.data;
+                });
 
     vm.getController = () => {
-        $http.get("http://localhost:3001/apis/controller")
+        $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
             .then((response) => {
+                console.log(response);
+
+                if (!response.data.SP) {
+                    response.data.SP = {}
+                }
+                if (!response.data.CO) {
+                    response.data.CO = {}
+                }
+                if (!response.data.PV) {
+                    response.data.PV = {}
+                }
+                if (!response.data.P) {
+                    response.data.P = {}
+                }
+                if (!response.data.I) {
+                    response.data.I = {}
+                }
+                if (!response.data.D) {
+                    response.data.D = {}
+                }
+
                 vm.graph.data = [
                     {
                         values: response.data.SP,
@@ -83,16 +102,6 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
             });  
     };
 
-    // TODO 데이터 옵션 클릭시 변경
-    // vm.changeOptions = () => {
-    //     vm.options.sp;
-    //     vm.options.co;
-    //     vm.options.pv;
-    //     vm.options.p;
-    //     vm.options.i;
-    //     vm.options.d;
-    // };
-
 	vm.graph.options = {
             chart: {
                 type: 'lineChart',
@@ -104,24 +113,11 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                     left: 55
                 },
                 x: function(d){ 
-                    //console.log(d3.time.format('%Y-%m-%d').parse(d.ItemTimeStamp));
-                    // return d.ItemTimeStamp; 
-                    if (d.ItemTimeStamp) {
-                        var date = new Date(d.ItemTimeStamp);
-                        // console.log(date.getTime());
-                        return date.getTime() / 1000;
-                    } else {
-                        return d.x;
-                    }
+                    var date = new Date(d.ItemTimeStamp);
+                    return date.getTime() / 1000;
                 },
                 y: function(d){ 
-                    // console.log(d);
-                    if (d.ItemCurrentValue) {
-                        return d.ItemCurrentValue;
-                    } else {
-                        return d.y;
-                    }
-                    // return d.ItemCurrentValue; 
+                    return d.ItemCurrentValue;
                 },
                 useInteractiveGuideline: false, // 여러개 한꺼본에 보이게 하는 옵션
                 dispatch: {
@@ -163,41 +159,6 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
                     'margin': '10px 13px 0px 7px'
                 }
             },
-        };
-
-        vm.graph.data = sinAndCos();
-
-        /*Random Data Generator */
-        function sinAndCos() {
-            var sin = [],sin2 = [],
-                cos = [];
-
-            //Data is represented as an array of {x,y} pairs.
-            for (var i = 0; i < 100; i++) {
-                sin.push({x: i, y: Math.sin(i/10)});
-                sin2.push({x: i, y: i % 10 == 5 ? null : Math.sin(i/10) *0.25 + 0.5});
-                cos.push({x: i, y: .5 * Math.cos(i/10+ 2) + Math.random() / 10});
-            }
-
-            //Line chart data should be sent as an array of series objects.
-            return [
-                {
-                    values: sin,      //values - represents the array of {x,y} data points
-                    key: 'Sine Wave', //key  - the name of the series.
-                    color: '#ff7f0e'  //color - optional: choose your own line color.
-                },
-                {
-                    values: cos,
-                    key: 'Cosine Wave',
-                    color: '#2ca02c'
-                },
-                {
-                    values: sin2,
-                    key: 'Another sine wave',
-                    color: '#7777ff',
-                    area: true      //area - set to true if you want this line to turn into a filled area chart.
-                }
-            ];
         };
 }]);
 
