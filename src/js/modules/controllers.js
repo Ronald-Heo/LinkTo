@@ -13,6 +13,20 @@ const controllers = angular.module('controllers', [
     FileSaver
 ]);
 
+var isLogined = ($q, $state, $http) => {
+    $http.get(`${config.apiServer}/apis/users/me`)
+        .success((data, status, headers, config) => {
+            console.log(response);
+            return;
+        })
+        .error((data, status, headers, config) => {
+            // never reached even for 400/500 status codes
+            console.log(status);
+            $state.go('login');
+            $q.reject();
+        });
+}
+
 controllers.controller('HeaderController', function(){
     const vm = this;
 
@@ -31,7 +45,8 @@ controllers.controller('DBListController', function(){
     const vm = this;
 });
 
-controllers.controller('DashboardController', ['$http', 'FileSaver', function($http, FileSaver){
+controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSaver', function($q, $state, $http, FileSaver){
+    isLogined($q, $state, $http);
 	const vm = this;
 
     vm.category = [];
@@ -39,7 +54,8 @@ controllers.controller('DashboardController', ['$http', 'FileSaver', function($h
         options: {},
         data: {}
     };
-    vm.playList;
+
+    vm.playList;    // 재생 여부
 
     $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
                 .then((response) => {
@@ -60,14 +76,23 @@ controllers.controller('DashboardController', ['$http', 'FileSaver', function($h
     }
 
     vm.export = () => {
+        if (!vm.graph.data) {
+            confirm('출력할 데이터가 없습니다.');
+            return;
+        }
         console.log('export');
         // TODO Export
         var defaultFileName = 'export.csv';
         var type = 'application/vnd.ms-excel;charset=charset=utf-8';
+        // var key = [];
+        
+        // _.map(vm.graph.data, (controller) => {
 
-        var data = JSON.stringify(vm.graph.data);
-        console.log(data);
-        var blob = new Blob([data], { type: type });
+        // });
+
+        console.log(vm.graph.data);
+
+        var blob = new Blob(['a,b,c,d\n1,2,3,4\nq,,e,r'], { type: type });
         FileSaver.saveAs(blob, defaultFileName);
     }
 
@@ -137,7 +162,7 @@ controllers.controller('DashboardController', ['$http', 'FileSaver', function($h
 
 	vm.graph.options = {
             chart: {
-                type: 'lineWithFocusChart',
+                type: 'lineChart',
                 height: 450,
                 margin : {
                     top: 20,
@@ -146,7 +171,7 @@ controllers.controller('DashboardController', ['$http', 'FileSaver', function($h
                     left: 55
                 },
                 x: function(d){ 
-                    var date = new Date(d.ItemTimeStamp);
+                    //var date = new Date(d.ItemTimeStamp);
                     return d.ItemTimeStamp;
                 },
                 y: function(d){ 
@@ -192,7 +217,58 @@ controllers.controller('DashboardController', ['$http', 'FileSaver', function($h
                     'margin': '10px 13px 0px 7px'
                 }
             },
+            zoom: {
+                //NOTE: All attributes below are optional
+                enabled: true,
+                scale: 1,
+                scaleExtent: [1, 10],
+                translate: [0, 0],
+                useFixedDomain: false,
+                useNiceScale: false,
+                horizontalOff: false,
+                verticalOff: false,
+                zoomed: function(xDomain, yDomain) {
+                    var domains = {x1: 0, x2: 0, y1: 1, y2: 1};
+                    return domains;
+                },
+                unzoomed: function(xDomain, yDomain) {
+                    var domains = {x1: 0, x2: 0, y1: 0, y2: 0};
+                    return domains;
+                },
+                unzoomEventType: 'dblclick.zoom'
+            }
         };
+      
+}]);
+
+controllers.controller('LoginController', ['$http', '$state', function($http, $state){
+    const vm = this;
+
+    vm.form = {
+        id: '',
+        pw: ''
+    }
+
+    vm.login = () => {
+        $http.post(`${config.apiServer}/apis/users/me`, vm.form)
+            .success(function(data, status, headers, config) {
+                $state.go('dashboard');
+            })
+            .error(function(data, status, headers, config) {
+                alert('잘못된 계정입니다.');
+                $state.reload();
+            });
+    };
+
+    vm.logout = () => {
+        $http.delete(`${config.apiServer}/apis/users/me`)
+            .success(function(data, status, headers, config) {
+                $state.go('login');
+            })
+            .error(function(data, status, headers, config) {
+                $state.reload();
+            });
+    }
 }]);
 
 export default controllers;
