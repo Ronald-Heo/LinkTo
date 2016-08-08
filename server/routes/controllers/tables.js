@@ -7,7 +7,12 @@ import express from 'express';
 const router = express.Router();
  
 router.use((req, res, next) => {
-    next();
+    if(req.session.user) {
+        next();
+    } else {
+        res.status(404);
+        res.send('not logined');
+    }
 });
  
 router.get('/getTableGroup', (req, res) => {
