@@ -14,6 +14,7 @@ router.get('/me', (req, res) => {
     console.log('get: me');
     if (req.session.user) {
     	res.status(200);
+        res.send('success');
     } else {
     	res.status(404);
         res.send('not logined');
@@ -27,6 +28,7 @@ router.post('/me', (req, res) => {
     	req.session.user = 'admin';
 
         res.status(200);
+        res.send('success');
     } else {
     	req.session.user = '';
         res.clearCookie('linkto');
@@ -41,6 +43,7 @@ router.delete('me', (req, res) => {
 	console.log('delete: me');
     req.session.destory();
     res.clearCookie('linkto');
+    res.send('success');
 });
 
 export default router;
