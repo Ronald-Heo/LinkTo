@@ -2,14 +2,23 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import angularNvd3 from 'angular-nvd3';
-import d3 from 'd3';
-import nvd3 from 'nvd3';
-
+import config from '../../config';
+import FileSaver from 'angular-file-saver'
 
 const controllers = angular.module('controllers', [
-	'nvd3'
+    FileSaver
 ]);
+
+var isLogined = ($q, $state, $http) => {
+    $http.get(`${config.apiServer}/apis/users/me`)
+        .success((data, status, headers, config) => {
+            return;
+        })
+        .error((data, status, headers, config) => {
+            $state.go('login');
+            $q.reject();
+        });
+}
 
 controllers.controller('HeaderController', function(){
     const vm = this;
@@ -29,21 +38,51 @@ controllers.controller('DBListController', function(){
     const vm = this;
 });
 
-controllers.controller('DashboardController', ['$http', 'option', function($http, option){
+controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSaver', function($q, $state, $http, FileSaver){
+    isLogined($q, $state, $http);
 	const vm = this;
 
     vm.category = [];
-    vm.graph = {
-        options: {},
-        data: {}
+    vm.playList;    // 재생 여부
+
+    $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
+        .success((data, status, headers, config) => {
+            vm.category = data;
+        })
+        .error((data, status, headers, config) => {
+            
+        });
+
+    vm.play = () => {
+        console.log('play');
+        vm.playList = setInterval(function() {
+                console.log('aaa');
+            }, 3000);
     };
 
-    vm.call = () => {
-        $http.get("http://localhost:3001/apis/getNameGroup")
-            .then((response) => {
-                vm.category = response.data;
-            });
-    };
+    vm.stop = () => {
+        console.log('stop');
+        if (vm.playList)
+            clearInterval(vm.playList);
+    }
+
+    vm.export = () => {
+        if (!vm.graph.data) {
+            confirm('출력할 데이터가 없습니다.');
+            return;
+        }
+        console.log('export');
+        // TODO Export
+        var defaultFileName = 'export.csv';
+        var type = 'application/vnd.ms-excel;charset=charset=utf-8';
+        var blob = new Blob(['a,b,c,d\n1,2,3,4\nq,,e,r'], { type: type });
+        FileSaver.saveAs(blob, defaultFileName);
+    }
+
+    vm.import = () => {
+        console.log('import');
+        // TODO Import
+    }
 
     vm.callTable = () => {
         console.log(1);
@@ -55,186 +94,61 @@ controllers.controller('DashboardController', ['$http', 'option', function($http
             });
 
     vm.getController = () => {
-        $http.get("http://localhost:3001/apis/controller")
+        $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
             .then((response) => {
-                vm.graph.data = [
-                    {
-                        values: response.data.SP,
-                        key: 'SP',
-                        color: '#ff0000'
-                    },
-                    {
-                        values: response.data.CO,
-                        key: 'CO',
-                        color: '#007f00'
-                    },
-                    {
-                        values: response.data.PV,
-                        key: 'PV',
-                        color: '#00000e'
-                    },
-                    {
-                        values: response.data.P,
-                        key: 'P',
-                        color: '#ffff0e'
-                    },
-                    {
-                        values: response.data.I,
-                        key: 'I',
-                        color: '#007f0e'
-                    },
-                    {
-                        values: response.data.D,
-                        key: 'D',
-                        color: '#ff000e'
-                    },
-                ];
+                console.log(response);
+
+
+                if (!response.data.SP) {
+                    response.data.SP = {}
+                }
+                if (!response.data.CO) {
+                    response.data.CO = {}
+                }
+                if (!response.data.PV) {
+                    response.data.PV = {}
+                }
+                if (!response.data.P) {
+                    response.data.P = {}
+                }
+                if (!response.data.I) {
+                    response.data.I = {}
+                }
+                if (!response.data.D) {
+                    response.data.D = {}
+                }
             });  
     };
+}]);
 
-    // TODO 데이터 옵션 클릭시 변경
-    // vm.changeOptions = () => {
-    //     vm.options.sp;
-    //     vm.options.co;
-    //     vm.options.pv;
-    //     vm.options.p;
-    //     vm.options.i;
-    //     vm.options.d;
-    // };
+controllers.controller('LoginController', ['$http', '$state', function($http, $state){
+    const vm = this;
 
-	vm.graph.options = {
-            chart: {
-                type: 'lineChart',
-                height: 650,
-                margin : {
-                    top: 20,
-                    right: 20,
-                    bottom: 40,
-                    left: 50
-                },
-                x: function(d){ 
-                    //console.log(d3.time.format('%Y-%m-%d').parse(d.ItemTimeStamp));
-                    // return d.ItemTimeStamp; 
-                    if (d.ItemTimeStamp) {
-                        var date = new Date(d.ItemTimeStamp);
-                        // console.log(date.getTime());
-                        return date.getTime()/100;
-                    } else {
-                        return d.x;
-                    }
-                },
-                y: function(d){ 
-                    // console.log(d);
-                    if (d.ItemCurrentValue) {
-                        return d.ItemCurrentValue;
-                    } else {
-                        return d.y;
-                    }
-                    // return d.ItemCurrentValue; 
-                },
-                "showDistX": true,
-                "showDistY": true,
-                "duration": 350,
-                "xAxis": {
-                  "axisLabel": "X Axis"
-                },
-                useInteractiveGuideline: false, // 여러개 한꺼본에 보이게 하는 옵션
-                dispatch: {
-                    stateChange: function(e){ console.log("stateChange"); },
-                    changeState: function(e){ console.log("changeState"); },
-                    tooltipShow: function(e){ console.log("tooltipShow"); },
-                    tooltipHide: function(e){ console.log("tooltipHide"); }
-                },
-                xAxis: {
-                    axisLabel: 'Time',
-                    tickFormat: function(d) { 
-                        return d3.time.format('%H:%M:%S')(new Date(d));
-                    }
-                },
-                yAxis: {
-                    axisLabel: 'Value',
-                    // tickFormat: function(d){
-                    //     return d3.format('.05f')(d);
-                    // },
-                    axisLabelDistance: -5
-                },
-                callback: function(chart){
-                    // 그래프 다 그린다음에 호출되는 Callback
-                    console.log("lineChart callback 완료");
-                },
+    vm.form = {
+        id: '',
+        pw: ''
+    }
 
-                // chart 속성 마지막에 Zoom 기능 추가 
-                zoom: {
-                    //NOTE: All attributes below are optional
-                    enabled: true,
-                    scaleExtent: [1, 10],
-                    useFixedDomain: false,
-                    useNiceScale: false,
-                    horizontalOff: false,
-                    verticalOff: false,
-                    /*zoomed: function(xDomain, yDomain) {
-                        var domains = {x1: 0, x2: 0, y1: 100, y2: 100};
-                        return domains;
-                    },
-                    unzoomed: function(xDomain, yDomain) {
-                        var domains = {x1: 0, x2: 0, y1: 0, y2: 0};
-                        return domains;
-                    },*/
-                    unzoomEventType: 'dblclick.zoom'
-                }
-            },
-            title: {
-                enable: true,
-                text: 'LinkTo Data',
-                css: {
-                    'text-align': 'center'
-                }
-            },
-            subtitle: {
-                enable: true,
-                text: '현재 선택된 옵션을 적용시킨 데이터 결과값',
-                css: {
-                    'text-align': 'center',
-                    'margin': '10px 13px 0px 7px'
-                }
-            },
-        };
+    vm.login = () => {
+        $http.post(`${config.apiServer}/apis/users/me`, vm.form)
+            .success(function(data, status, headers, config) {
+                $state.go('dashboard');
+            })
+            .error(function(data, status, headers, config) {
+                alert('잘못된 계정입니다.');
+                $state.reload();
+            });
+    };
 
-        
+    vm.logout = () => {
+        $http.delete(`${config.apiServer}/apis/users/me`)
+            .success(function(data, status, headers, config) {
+                $state.go('login');
+            })
+            .error(function(data, status, headers, config) {
+                $state.reload();
+            });
+    }
 }]);
 
 export default controllers;
-//vm.graph.data = sinAndCos();
-
-        /*Random Data Generator */
-      //  function sinAndCos() {
-       //     var sin = [],sin2 = [],
-        //        cos = [];
-
-            //Data is represented as an array of {x,y} pairs.
-         /*   for (var i = 0; i < 100; i++) {
-                sin.push({x: i, y: Math.sin(i/10)});
-                sin2.push({x: i, y: i % 10 == 5 ? null : Math.sin(i/10) *0.25 + 0.5});
-                cos.push({x: i, y: .5 * Math.cos(i/10+ 2) + Math.random() / 10});
-            }*/
-
-            //Line chart data should be sent as an array of series objects.
-            /*return [
-                {
-                    values: sin,      //values - represents the array of {x,y} data points
-                    key: 'Sine Wave', //key  - the name of the series.
-                    color: '#ff7f0e'  //color - optional: choose your own line color.
-                },
-                {
-                    values: cos,
-                    key: 'Cosine Wave',
-                    color: '#2ca02c'
-                },
-                {
-                    values: sin2,
-                    key: 'Another sine wave',
-                    color: '#7777ff',
-                    area: true      //area - set to true if you want this line to turn into a filled area chart.
-                }
-            ];
-        };*/

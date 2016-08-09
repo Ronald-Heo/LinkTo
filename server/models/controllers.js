@@ -2,32 +2,24 @@
 
 const _ = require('lodash');
 var conn = require('./index').conn;
-// import _ from 'lodash';
-// import conn from './index';
 conn = conn.conn ? conn.conn : conn;
 
-exports.getTableName = (callback) => {
-	console.log(1);
-	conn.query('Show tables;', callback);
+
+exports.getTableGroup = (callback) => {
+	conn.query('show tables;', callback);
 };
 
-exports.getNameGroup = (callback) => {
-	conn.query('SELECT ItemID FROM linkto.tic002 group by ItemID;', callback);
+exports.getControllerData = (table, callback) => {
+	var query = conn.query(`SELECT * FROM ${table} order by ItemID, ItemTimeStamp`, callback);
 };
+
+// 기본 함수
 
 exports.select = (table, name, timestamp) => {
 	return conn.query(`SELECT * from '${table}' where name = '${name}' and timestamp = '${timestamp}'`, function(err, rows, fields) {
 		if (err)
 			throw err;
 	});
-};
-
-exports.select2 = () => {
-	var query = conn.query(`SELECT * from tic002`, function(err, rows, fields) {
-		if (err)
-			throw err;
-	});
-	return query;
 };
 
 exports.create = () => {

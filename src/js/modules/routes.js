@@ -10,28 +10,22 @@ const routes = angular.module('routes', [
 ]);
 
 routes.config(['$stateProvider', '$urlRouterProvider', ($stateProvider, $urlRouterProvider) => {
-	$urlRouterProvider.otherwise("/");
-
 	$stateProvider
 	    .state('intro', {
-	      url: '/',
-	      resolve: {
-	        
-	      },
-		  templateUrl: 'intro.html',
-		  controller: 'HeaderController as vm'
+	    	url: '/',
+			templateUrl: 'intro.html',
+			controller: 'HeaderController as vm'
+	    })
+	    .state('login', {
+	    	url: '/login',
+			templateUrl: 'login.html',
+			controller: 'LoginController as vm'	
 	    });
 
 	$stateProvider
 	    .state('dashboard', {
 	      url: '/dashboard',
 	      resolve: {
-	      	option() {
-	      		return 'zzz';
-	      	},
-	      	data() {
-	      		return 'test';	
-	      	}
 	      },
 		  templateUrl: 'dashboard.html',
 		  controller: 'DashboardController as vm'

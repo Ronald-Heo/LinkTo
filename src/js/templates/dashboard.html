@@ -2,41 +2,17 @@
 	
 	<div id="content-dashboard">
 		<header>
-			<h3 id="header-title" class="h3">{{vm.selectedCategory}}</h3>
+
+			<h3 id="header-title" class="h3">Dashboard</h3>
 			<div id="table-selector">
-				<select id="category-select" class="form-control" ng-model="vm.selectedCategory" ng-options="category for category in vm.category track by category">
+				<select id="category-select" class="form-control" ng-model="vm.selectedCategory" ng-options="category for category in vm.category track by category" ng-change="vm.getController()">
 				</select>
-				<input id="category-field" class="form-control" type="text" >
+				<input id="category-field" class="form-control" type="text">
 			</div>
 		</header>
 
-		<nvd3 id="graph" options="vm.graph.options" data="vm.graph.data"></nvd3>
 	</div>
 	<div id="side-menu">
-		<div>
-			<div>
-			<button type="button" class="btn btn-default btn-menu" ng-click="vm.callTable()" ng-click="vm.call()" ng-click="vm.getController()">그래프 확인</button>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox" >SP</label>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox" ng-click="vm.getController()">CO</label>
-			</div>	
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox" >PV</label>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox">P</label>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox">I</label>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox">D</label>
-			</div>
-		</div>
-
 		<div>
 			<h4 class="h4">Current Value</h4>
 			<pre>
@@ -50,10 +26,10 @@
 		</div>
 
 		<div>
-			<button type="button" class="btn btn-primary btn-menu">재생</button>
-			<button type="button" class="btn btn-danger btn-menu">일시정지</button>
-			<button type="button" class="btn btn-default btn-menu">Import</button>
-			<button type="button" class="btn btn-default btn-menu">Export</button>
+			<button type="button" class="btn btn-primary btn-menu" ng-click="vm.play()">재생</button>
+			<button type="button" class="btn btn-danger btn-menu" ng-click="vm.stop()">일시정지</button>
+			<button type="button" class="btn btn-default btn-menu" ng-click="vm.import()">Import</button>
+			<button type="button" class="btn btn-default btn-menu" ng-click="vm.export()">Export</button>
 		</div>
 	</div>
 </section>
