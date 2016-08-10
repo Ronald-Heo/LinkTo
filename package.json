@@ -36,18 +36,13 @@
     "angular-ui-router": "^0.3.1",
     "angular-ui-router-title": "0.0.4",
     "babel-register": "^6.11.6",
-<<<<<<< HEAD
-=======
     "body-parser": "^1.15.2",
->>>>>>> 36f69fc080cd523aa7259d66eb28e82a0686204f
     "bootstrap": "^3.3.7",
     "csv-parser": "^1.9.3",
-    "d3": "^3.4.4",
     "express": "^4.14.0",
     "express-session": "^1.14.0",
     "glob": "^7.0.5",
     "lodash": "^4.13.1",
-    "mysql": "^2.11.1",
-    "nvd3": "^1.8.4"
+    "mysql": "^2.11.1"
   }
 }

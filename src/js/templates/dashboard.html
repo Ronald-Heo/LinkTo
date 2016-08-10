@@ -2,7 +2,6 @@
 	
 	<div id="content-dashboard">
 		<header>
-
 			<h3 id="header-title" class="h3">Dashboard</h3>
 			<div id="table-selector">
 				<select id="category-select" class="form-control" ng-model="vm.selectedCategory" ng-options="category for category in vm.category track by category" ng-change="vm.getController()">
@@ -10,7 +9,6 @@
 				<input id="category-field" class="form-control" type="text">
 			</div>
 		</header>
-
 	</div>
 	<div id="side-menu">
 		<div>
@@ -32,4 +30,7 @@
 			<button type="button" class="btn btn-default btn-menu" ng-click="vm.export()">Export</button>
 		</div>
 	</div>
+
+
+
 </section>

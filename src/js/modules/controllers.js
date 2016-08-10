@@ -36,6 +36,66 @@ controllers.controller('AccountController', function(){
 
 controllers.controller('DBListController', function(){
     const vm = this;
+
+        vm.margin = {top: 20, right: 20, bottom: 30, left: 300},
+        width = 1260 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+        vm.x = d3.scale.linear()
+            .domain([-width / 2, width / 2])
+            .range([0, width]);
+
+        vm.y = d3.scale.linear()
+            .domain([-height / 2, height / 2])
+            .range([height, 0]);
+
+        vm.xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom")
+            .tickSize(-height);
+
+        vm.yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .ticks(5)
+            .tickSize(-width);
+
+        vm.zoom = d3.behavior.zoom()
+            .x(x)
+            .y(y)
+            .scaleExtent([1, 32])
+            .on("zoom", zoomed);
+
+        vm.svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .call(zoom);
+
+        svg.append("rect")
+            .attr("width", width)
+            .attr("height", height);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        vm.zoomed = () => {
+          svg.select(".x.axis").call(xAxis);
+          svg.select(".y.axis").call(yAxis);
+        }
+
+        vm.test = 3;
+        console.log(vm.test);
+
+
+
 });
 
 controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSaver', function($q, $state, $http, FileSaver){
@@ -52,6 +112,19 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         .error((data, status, headers, config) => {
             
         });
+
+    /*데이터 불러오기*/
+    $http.get(`${config.apiServer}/apis/controllers/getControllerData`)
+        .success((data, status, headers, config) => {
+            vm.tagdata = data;
+        })
+        .error((data, status, headers, config) => {
+            
+        });
+
+
+    vm.searchKeyword = "none";
+
 
     vm.play = () => {
         console.log('play');
@@ -98,7 +171,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             .then((response) => {
                 console.log(response);
 
-
                 if (!response.data.SP) {
                     response.data.SP = {}
                 }
@@ -119,6 +191,10 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 }
             });  
     };
+
+
+
+
 }]);
 
 controllers.controller('LoginController', ['$http', '$state', function($http, $state){
