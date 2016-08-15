@@ -1,8 +1,11 @@
 'use strict';
 
 import angular from 'angular';
+import d3 from 'd3';
 
-const services = angular.module('services', []);
+const services = angular.module('services', [
+  'd3'
+]);
 
 services.factory('apiService', () => {
   const apiService = {
@@ -20,5 +23,10 @@ services.factory('apiService', () => {
 
   return apiService;
 });
+
+services.factory('d3Service', [function(){
+  var d3;
+  return d3;
+}];
 
 export default services;
