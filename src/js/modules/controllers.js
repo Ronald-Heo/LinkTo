@@ -15,8 +15,9 @@ var isLogined = ($q, $state, $http) => {
             return;
         })
         .error((data, status, headers, config) => {
-            $state.go('login');
-            $q.reject();
+            return; // TODO 테스트용 
+            // $state.go('login');
+            // $q.reject();
         });
 }
 
@@ -85,7 +86,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         
         var svg = d3.select("svg");
 
-        console.log(svg.attr("width"));
+        console.log(svg);
 
         var margin = {top: 20, right: 80, bottom: 30, left: 50},
         width = 850,
@@ -102,76 +103,113 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
       var line = d3.line()
           .curve(d3.curveBasis)
           .x(function(d) { 
-            console.log(d);
-            return x(d.ItemTimeStamp); 
+            return d.ItemTimeStamp; 
           })
           .y(function(d) { 
-            console.log(d);
-            return y(d.ItemCurrentValue); 
+            return d.ItemCurrentValue; 
           });
 
-          d3.tsv("apis/controllers/controller", type, function(error, data) {
-            if (error) throw error;
-
+      $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
+        .success((data, status, headers, config) => {
             console.log(data);
-            var cities = data.columns.slice(1).map(function(id) {
-              return {
-                id: id,
-                values: data.map(function(d) {
-                  return {date: d.date, temperature: d[id]};
-                })
+            var controller = _.map(data, function(instance) {
+              console.log(instance);
+              var obj = {};
+              obj.value = {};
+              
+              obj.id = instance.ItemID;
+              obj.value[obj.id] = {
+                date: instance.ItemTimeStamp,
+                data: instance.ItemCurrentValue
               };
+
+              console.log(obj);
+
+              return obj;
             });
-            console.log(cities);
-          x.domain(d3.extent(data, function(d) { 
-            return d.date; 
-          }));
 
-          y.domain([
-            d3.min(cities, function(c) { return d3.min(c.values, function(d) { return d.temperature; }); }),
-            d3.max(cities, function(c) { return d3.max(c.values, function(d) { return d.temperature; }); })
-          ]);
+            x.domain(d3.extent(controller, function(d) { 
+              return d.date; 
+            }));
 
-          z.domain(cities.map(function(c) { return c.id; }));
+            y.domain([
+              d3.min(controller, function(c) { return d3.min(c.values, function(d) { return d.value; }); }),
+              d3.max(controller, function(c) { return d3.max(c.values, function(d) { return d.value; }); })
+            ]);
 
-          g.append("g")
-              .attr("class", "axis axis--x")
-              .attr("transform", "translate(0," + height + ")")
-              .call(d3.axisBottom(x));
-
-          g.append("g")
-              .attr("class", "axis axis--y")
-              .call(d3.axisLeft(y))
-            .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 6)
-              .attr("dy", "0.71em")
-              .attr("fill", "#000")
-              .text("Temperature, ºF");
-
-          var city = g.selectAll(".city")
-            .data(cities)
-            .enter().append("g")
-              .attr("class", "city");
-
-          city.append("path")
-              .attr("class", "line")
-              .attr("d", function(d) { 
-                console.log(d);
-                return line(d.values); 
-              })
-              .style("stroke", function(d) { 
-                return z(d.id); 
-              });
-
-          city.append("text")
-              .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
-              .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
-              .attr("x", 3)
-              .attr("dy", "0.35em")
-              .style("font", "10px sans-serif")
-              .text(function(d) { return d.id; });
+            z.domain(controller.map(function(c) { return c.id; }));
+            //console.log();
+        })
+        .error((data, status, headers, config) => {
+            console.log('err');
+            console.log(data);
         });
+
+
+        //   d3.tsv("apis/controllers/controller", type, function(error, data) {
+        //     console.log(error);
+        //     console.log(data);
+
+        //     if (error) throw error;
+
+        //     var cities = data.columns.slice(1).map(function(id) {
+        //       return {
+        //         id: id,
+        //         values: data.map(function(d) {
+        //           return {date: d.date, temperature: d[id]};
+        //         })
+        //       };
+        //     });
+        //     console.log(cities);
+        //   x.domain(d3.extent(data, function(d) { 
+        //     return d.date; 
+        //   }));
+
+        //   y.domain([
+        //     d3.min(cities, function(c) { return d3.min(c.values, function(d) { return d.temperature; }); }),
+        //     d3.max(cities, function(c) { return d3.max(c.values, function(d) { return d.temperature; }); })
+        //   ]);
+
+        //   z.domain(cities.map(function(c) { return c.id; }));
+
+        //   g.append("g")
+        //       .attr("class", "axis axis--x")
+        //       .attr("transform", "translate(0," + height + ")")
+        //       .call(d3.axisBottom(x));
+
+        //   g.append("g")
+        //       .attr("class", "axis axis--y")
+        //       .call(d3.axisLeft(y))
+        //     .append("text")
+        //       .attr("transform", "rotate(-90)")
+        //       .attr("y", 6)
+        //       .attr("dy", "0.71em")
+        //       .attr("fill", "#000")
+        //       .text("Temperature, ºF");
+
+        //   var city = g.selectAll(".city")
+        //     .data(cities)
+        //     .enter().append("g")
+        //       .attr("class", "city");
+
+        //   city.append("path")
+        //       .attr("class", "line")
+        //       .attr("d", function(d) { 
+        //         console.log(d);
+        //         return line(d.values); 
+        //       })
+        //       .style("stroke", function(d) { 
+        //         return z(d.id); 
+        //       });
+
+        //   city.append("text")
+        //       .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
+        //       .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
+        //       .attr("x", 3)
+        //       .attr("dy", "0.35em")
+        //       .style("font", "10px sans-serif")
+        //       .text(function(d) { return d.id; });
+        // });
 
         function type(d, _, columns) {
           d.date = parseTime(d.date);
