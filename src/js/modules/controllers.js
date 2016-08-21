@@ -91,6 +91,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
             data = _.map(data, (info) => {
               info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
+              info.ItemCurrentValue = +info.ItemCurrentValue;
               return info;
             });
 
@@ -99,7 +100,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 height = 500 - margin.top - margin.bottom;
 
             var formatDate = d3.time.format("%X").parse;
-            console.log(formatDate('11:11:11'));
             var x = d3.time.scale()
                 .range([0, width]);
 
@@ -115,14 +115,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .orient("left");
             
             var line = d3.svg.line()
-                .x(function(d) { 
+                .x(function(d) {
                   return x(formatDate(d.ItemTimeStamp)); 
                 })
                 .y(function(d) { 
                   return y(d.ItemCurrentValue); 
                 });
-
-                console.log(1);
 
             var svg = d3.select("svg")
                 .attr("width", width + margin.left + margin.right)
@@ -132,7 +130,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
             x.domain(d3.extent(data, 
               function(d) { 
-                console.log((d.ItemTimeStamp));
                 return formatDate(d.ItemTimeStamp);
               })
             );
@@ -155,11 +152,10 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .attr("y", 6)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
-                .text("Price ($)");
+                .text("Value");
 
-            console.log(data);
             svg.append("path")
-                .data(data)
+                .datum(data)
                 .attr("class", "line")
                 .attr("d", line);
         })
