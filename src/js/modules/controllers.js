@@ -3,7 +3,8 @@
 import _ from 'lodash';
 import angular from 'angular';
 import config from '../../config';
-import FileSaver from 'angular-file-saver'
+import FileSaver from 'angular-file-saver';
+import moment from 'moment';
 
 const controllers = angular.module('controllers', [
     FileSaver
@@ -85,43 +86,61 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         // TODO Import
         
       $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
+      // $http.get(`${config.apiServer}/apis/controllers/controller?table=unit`)
         .success((data, status, headers, config) => {
+
+            data = _.map(data, (info) => {
+              info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
+              return info;
+            });
+
             var margin = {top: 20, right: 20, bottom: 30, left: 50},
                 width = 960 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
 
-            var formatDate = d3.timeFormat("%d-%b-%y");
-            console.log(1);
+            var formatDate = d3.time.format("%X").parse;
+            console.log(formatDate('11:11:11'));
             var x = d3.time.scale()
                 .range([0, width]);
 
-            console.log(2);
             var y = d3.scale.linear()
                 .range([height, 0]);
-            
-            console.log(3);
+
             var xAxis = d3.svg.axis()
                 .scale(x)
                 .orient("bottom");
-            
-            console.log(4);
+
             var yAxis = d3.svg.axis()
                 .scale(y)
                 .orient("left");
             
-            console.log(5);
             var line = d3.svg.line()
-                .x(function(d) { return x(d.ItemTimeStamp); })
-                .y(function(d) { return y(d.ItemCurrentValue); });
+                .x(function(d) { 
+                  return x(formatDate(d.ItemTimeStamp)); 
+                })
+                .y(function(d) { 
+                  return y(d.ItemCurrentValue); 
+                });
 
-            var svg = d3.select("body").append("svg")
+                console.log(1);
+
+            var svg = d3.select("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            x.domain(d3.extent(data, function(d) { return d.ItemTimeStamp; }));
-            y.domain(d3.extent(data, function(d) { return d.ItemCurrentValue; }));
+            x.domain(d3.extent(data, 
+              function(d) { 
+                console.log((d.ItemTimeStamp));
+                return formatDate(d.ItemTimeStamp);
+              })
+            );
+
+            y.domain(d3.extent(data, 
+              function(d) {
+               return d.ItemCurrentValue; 
+             }));
 
             svg.append("g")
                 .attr("class", "x axis")
@@ -138,15 +157,14 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .style("text-anchor", "end")
                 .text("Price ($)");
 
+            console.log(data);
             svg.append("path")
-                .datum(data)
+                .data(data)
                 .attr("class", "line")
                 .attr("d", line);
-
         })
         .error((data, status, headers, config) => {
             console.log('err');
-            console.log(data);
         });
     }
 
