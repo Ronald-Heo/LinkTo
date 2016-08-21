@@ -84,138 +84,70 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         console.log('import');
         // TODO Import
         
-        var svg = d3.select("svg");
-
-        console.log(svg);
-
-        var margin = {top: 20, right: 80, bottom: 30, left: 50},
-        width = 850,
-        height = 550,
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        
-      var parseTime = d3.timeParse("%Y%m%d");
-
-      var x = d3.scaleTime().range([0, width]),
-          y = d3.scaleLinear().range([height, 0]),
-          z = d3.scaleOrdinal(d3.schemeCategory10);
-      
-      var line = d3.line()
-          .curve(d3.curveBasis)
-          .x(function(d) { 
-            return d.ItemTimeStamp; 
-          })
-          .y(function(d) { 
-            return d.ItemCurrentValue; 
-          });
-
       $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
         .success((data, status, headers, config) => {
-            console.log(data);
-            var controller = _.map(data, function(instance) {
-              console.log(instance);
-              var obj = {};
-              obj.value = {};
-              
-              obj.id = instance.ItemID;
-              obj.value[obj.id] = {
-                date: instance.ItemTimeStamp,
-                data: instance.ItemCurrentValue
-              };
+            var margin = {top: 20, right: 20, bottom: 30, left: 50},
+                width = 960 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
 
-              console.log(obj);
+            var formatDate = d3.timeFormat("%d-%b-%y");
+            console.log(1);
+            var x = d3.time.scale()
+                .range([0, width]);
 
-              return obj;
-            });
+            console.log(2);
+            var y = d3.scale.linear()
+                .range([height, 0]);
+            
+            console.log(3);
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+            
+            console.log(4);
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+            
+            console.log(5);
+            var line = d3.svg.line()
+                .x(function(d) { return x(d.ItemTimeStamp); })
+                .y(function(d) { return y(d.ItemCurrentValue); });
 
-            x.domain(d3.extent(controller, function(d) { 
-              return d.date; 
-            }));
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            y.domain([
-              d3.min(controller, function(c) { return d3.min(c.values, function(d) { return d.value; }); }),
-              d3.max(controller, function(c) { return d3.max(c.values, function(d) { return d.value; }); })
-            ]);
+            x.domain(d3.extent(data, function(d) { return d.ItemTimeStamp; }));
+            y.domain(d3.extent(data, function(d) { return d.ItemCurrentValue; }));
 
-            z.domain(controller.map(function(c) { return c.id; }));
-            //console.log();
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+              .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Price ($)");
+
+            svg.append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("d", line);
+
         })
         .error((data, status, headers, config) => {
             console.log('err');
             console.log(data);
         });
-
-
-        //   d3.tsv("apis/controllers/controller", type, function(error, data) {
-        //     console.log(error);
-        //     console.log(data);
-
-        //     if (error) throw error;
-
-        //     var cities = data.columns.slice(1).map(function(id) {
-        //       return {
-        //         id: id,
-        //         values: data.map(function(d) {
-        //           return {date: d.date, temperature: d[id]};
-        //         })
-        //       };
-        //     });
-        //     console.log(cities);
-        //   x.domain(d3.extent(data, function(d) { 
-        //     return d.date; 
-        //   }));
-
-        //   y.domain([
-        //     d3.min(cities, function(c) { return d3.min(c.values, function(d) { return d.temperature; }); }),
-        //     d3.max(cities, function(c) { return d3.max(c.values, function(d) { return d.temperature; }); })
-        //   ]);
-
-        //   z.domain(cities.map(function(c) { return c.id; }));
-
-        //   g.append("g")
-        //       .attr("class", "axis axis--x")
-        //       .attr("transform", "translate(0," + height + ")")
-        //       .call(d3.axisBottom(x));
-
-        //   g.append("g")
-        //       .attr("class", "axis axis--y")
-        //       .call(d3.axisLeft(y))
-        //     .append("text")
-        //       .attr("transform", "rotate(-90)")
-        //       .attr("y", 6)
-        //       .attr("dy", "0.71em")
-        //       .attr("fill", "#000")
-        //       .text("Temperature, ºF");
-
-        //   var city = g.selectAll(".city")
-        //     .data(cities)
-        //     .enter().append("g")
-        //       .attr("class", "city");
-
-        //   city.append("path")
-        //       .attr("class", "line")
-        //       .attr("d", function(d) { 
-        //         console.log(d);
-        //         return line(d.values); 
-        //       })
-        //       .style("stroke", function(d) { 
-        //         return z(d.id); 
-        //       });
-
-        //   city.append("text")
-        //       .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
-        //       .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
-        //       .attr("x", 3)
-        //       .attr("dy", "0.35em")
-        //       .style("font", "10px sans-serif")
-        //       .text(function(d) { return d.id; });
-        // });
-
-        function type(d, _, columns) {
-          d.date = parseTime(d.date);
-          for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c];
-          return d;
-        }
     }
 
     vm.getController = () => {

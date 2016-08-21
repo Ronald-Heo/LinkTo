@@ -28,7 +28,8 @@ router.get('/controller', (req, res) => {
 	if (req.query.table) {
 		controllers.getControllerData(req.query.table, function(err, result) {
             // 필요한 데이터로 걸러냄 
-            res.send(_.groupBy(result, 'ItemTimeStamp'));
+            // res.send(_.groupBy(result, 'ItemTimeStamp'));
+            res.send(result);
         });
 	} else {
         res.status(400);
