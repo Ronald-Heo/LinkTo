@@ -106,6 +106,8 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             var y = d3.scale.linear()
                 .range([height, 0]);
 
+            // var z = d3.scaleOrdinal(d3.schemeCategory10);
+
             var xAxis = d3.svg.axis()
                 .scale(x)
                 .orient("bottom");
@@ -115,6 +117,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .orient("left");
             
             var line = d3.svg.line()
+                // .curve(d3.curveBasis)
                 .x(function(d) {
                   return x(formatDate(d.ItemTimeStamp)); 
                 })
