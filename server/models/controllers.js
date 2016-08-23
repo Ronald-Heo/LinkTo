@@ -9,7 +9,8 @@ exports.getTableGroup = (callback) => {
 };
 
 exports.getControllerData = (table, callback) => {
-	var query = conn.query(`SELECT * FROM ${table} order by ItemID, ItemTimeStamp`, callback);
+	// var query = conn.query(`SELECT * FROM ${table} order by ItemTimeStamp, ItemID`, callback);
+	var query = conn.query(`SELECT * FROM ${table} where ItemID = 'UNIT1.FLOW.CO' order by ItemTimeStamp, ItemID`, callback);
 };
 
 // 기본 함수

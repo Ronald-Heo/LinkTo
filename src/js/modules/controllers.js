@@ -3,7 +3,8 @@
 import _ from 'lodash';
 import angular from 'angular';
 import config from '../../config';
-import FileSaver from 'angular-file-saver'
+import FileSaver from 'angular-file-saver';
+import moment from 'moment';
 
 const controllers = angular.module('controllers', [
     FileSaver
@@ -15,8 +16,9 @@ var isLogined = ($q, $state, $http) => {
             return;
         })
         .error((data, status, headers, config) => {
-            $state.go('login');
-            $q.reject();
+            return; // TODO 테스트용 
+            // $state.go('login');
+            // $q.reject();
         });
 }
 
@@ -82,6 +84,87 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     vm.import = () => {
         console.log('import');
         // TODO Import
+        
+      $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
+      // $http.get(`${config.apiServer}/apis/controllers/controller?table=unit`)
+        .success((data, status, headers, config) => {
+
+            data = _.map(data, (info) => {
+              info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
+              info.ItemCurrentValue = +info.ItemCurrentValue;
+              return info;
+            });
+
+            var margin = {top: 20, right: 20, bottom: 30, left: 50},
+                width = 960 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            var formatDate = d3.time.format("%X").parse;
+            var x = d3.time.scale()
+                .range([0, width]);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // var z = d3.scaleOrdinal(d3.schemeCategory10);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+            
+            var line = d3.svg.line()
+                // .curve(d3.curveBasis)
+                .x(function(d) {
+                  return x(formatDate(d.ItemTimeStamp)); 
+                })
+                .y(function(d) { 
+                  return y(d.ItemCurrentValue); 
+                });
+
+            var svg = d3.select("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            x.domain(d3.extent(data, 
+              function(d) { 
+                return formatDate(d.ItemTimeStamp);
+              })
+            );
+
+            y.domain(d3.extent(data, 
+              function(d) {
+               return d.ItemCurrentValue; 
+             }));
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+              .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Value");
+
+            svg.append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("d", line);
+        })
+        .error((data, status, headers, config) => {
+            console.log('err');
+        });
     }
 
     vm.getController = () => {
