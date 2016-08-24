@@ -114,22 +114,30 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
             var yAxis = d3.svg.axis()
                 .scale(y)
-                .orient("left");
+                .orient("right");
             
             var line = d3.svg.line()
-                // .curve(d3.curveBasis)
                 .x(function(d) {
                   return x(formatDate(d.ItemTimeStamp)); 
                 })
                 .y(function(d) { 
                   return y(d.ItemCurrentValue); 
-                });
+                })
+                .interpolate("step-after");
+
+            var zoom = d3.behavior.zoom()
+            .on("zoom", draw); 
+
 
             var svg = d3.select("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                /*.call(zoom)*/;
+
+
+
 
             x.domain(d3.extent(data, 
               function(d) { 
@@ -141,6 +149,13 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
               function(d) {
                return d.ItemCurrentValue; 
              }));
+             zoom.x(x);
+
+              svg.select("path.line").data([data]);
+              draw();
+            /*svg.append("rect")
+                .attr("width", width)
+                .attr("height", height);*/
 
             svg.append("g")
                 .attr("class", "x axis")
@@ -151,7 +166,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .attr("class", "y axis")
                 .call(yAxis)
               .append("text")
-                .attr("transform", "rotate(-90)")
                 .attr("y", 6)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
@@ -161,6 +175,20 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .datum(data)
                 .attr("class", "line")
                 .attr("d", line);
+
+            svg.append("rect")
+                .attr("class", "pane")
+                .attr("width", width)
+                .attr("height", height)
+                .call(zoom);
+
+            
+
+            function draw() {
+              svg.select("g.x.axis").call(xAxis);
+              svg.select("g.y.axis").call(yAxis);
+              svg.select("path.line").attr("d", line);
+            }
         })
         .error((data, status, headers, config) => {
             console.log('err');
