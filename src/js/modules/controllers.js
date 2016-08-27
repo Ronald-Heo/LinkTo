@@ -69,16 +69,101 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     }
 
     vm.export = () => {
-        if (!vm.graph.data) {
-            confirm('출력할 데이터가 없습니다.');
-            return;
-        }
-        console.log('export');
-        // TODO Export
-        var defaultFileName = 'export.csv';
-        var type = 'application/vnd.ms-excel;charset=charset=utf-8';
-        var blob = new Blob(['a,b,c,d\n1,2,3,4\nq,,e,r'], { type: type });
-        FileSaver.saveAs(blob, defaultFileName);
+        // if (!vm.graph.data) {
+        //     confirm('출력할 데이터가 없습니다.');
+        //     return;
+        // }
+        // console.log('export');
+        // // TODO Export
+        // var defaultFileName = 'export.csv';
+        // var type = 'application/vnd.ms-excel;charset=charset=utf-8';
+        // var blob = new Blob(['a,b,c,d\n1,2,3,4\nq,,e,r'], { type: type });
+        // FileSaver.saveAs(blob, defaultFileName);
+        
+        // TestCode - Muti Line 
+        // 
+        // $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
+        $http.get(`${config.apiServer}/apis/controllers/controller?table=unit`)
+            .success((data, status, headers, config) => {
+                data = _.map(data, (infos, index) => {
+                    return {
+                        id: index,
+                        values: _.map(infos, (info) => {
+                            info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
+                            info.ItemCurrentValue = +info.ItemCurrentValue;
+                            return info;
+                        })
+                    };
+                });
+
+                console.log(data);
+
+                var svg = d3.select("svg"),
+                    margin = {top: 20, right: 80, bottom: 30, left: 50},
+                    width = svg.attr("width") - margin.left - margin.right,
+                    height = svg.attr("height") - margin.top - margin.bottom,
+                    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var parseTime = d3.timeParse("%Y%m%d");
+
+                var x = d3.scaleTime().range([0, width]),
+                    y = d3.scaleLinear().range([height, 0]),
+                    z = d3.scaleOrdinal(d3.schemeCategory10);
+
+                var line = d3.line()
+                    .curve(d3.curveBasis)
+                    .x(function(d) { return x(d.ItemTimeStamp); })
+                    .y(function(d) { return y(d.ItemCurrentValue); });
+
+                console.log(1);
+
+                  x.domain(d3.extent(data, function(d) { return d.ItemTimeStamp; }));
+console.log(1.1);
+                  y.domain([
+                    d3.min(data, function(c) { return d3.min(c.values, function(d) { return d.ItemCurrentValue; }); }),
+                    d3.max(data, function(c) { return d3.max(c.values, function(d) { return d.ItemCurrentValue; }); })
+                  ]);
+console.log(1.2);
+                  z.domain(data.map(function(c) { return c.id; }));
+console.log(2);
+console.log(height);
+                  g.append("g")
+                      .attr("class", "axis axis--x")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(d3.axisBottom(x));
+
+                  g.append("g")
+                      .attr("class", "axis axis--y")
+                      .call(d3.axisLeft(y))
+                    .append("text")
+                      .attr("transform", "rotate(-90)")
+                      .attr("y", 6)
+                      .attr("dy", "0.71em")
+                      .attr("fill", "#000")
+                      .text("Temperature, ºF");
+console.log(3);
+                  var city = g.selectAll(".city")
+                    .data(data)
+                    .enter().append("g")
+                      .attr("class", "city");
+console.log(3.1);
+                  city.append("path")
+                      .attr("class", "line")
+                      .attr("d", function(d) { return line(d.values); })
+                      .style("stroke", function(d) { return z(d.id); });
+console.log(3.2);
+                  city.append("text")
+                      .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
+                      .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
+                      .attr("x", 3)
+                      .attr("dy", "0.35em")
+                      .style("font", "10px sans-serif")
+                      .text(function(d) { return d.id; });
+                      console.log(4);
+        })
+        .error((data, status, headers, config) => {
+            console.log('err');
+        });
     }
 
     vm.import = () => {
