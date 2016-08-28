@@ -12,6 +12,26 @@
 	</div>
 	<div id="side-menu">
 		<div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox" ng-click="vm.call()">SP</label>
+			</div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox" ng-click="vm.getController()">CO</label>
+			</div>	
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox">PV</label>
+			</div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox">P</label>
+			</div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox">I</label>
+			</div>
+			<div class="checkbox-inline col-md-3">
+				<label><input type="checkbox">D</label>
+			</div>
+		</div>
+		<div>
 			<h4 class="h4">Current Value</h4>
 			<pre>
 				<label>PV: <span ng-bind="vm.current.pv"></span></label><br/>

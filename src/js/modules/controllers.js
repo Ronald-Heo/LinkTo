@@ -69,111 +69,16 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     }
 
     vm.export = () => {
-        // if (!vm.graph.data) {
-        //     confirm('출력할 데이터가 없습니다.');
-        //     return;
-        // }
-        // console.log('export');
-        // // TODO Export
-        // var defaultFileName = 'export.csv';
-        // var type = 'application/vnd.ms-excel;charset=charset=utf-8';
-        // var blob = new Blob(['a,b,c,d\n1,2,3,4\nq,,e,r'], { type: type });
-        // FileSaver.saveAs(blob, defaultFileName);
-        
-        // TestCode - Muti Line 
-        // 
-        // $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
-        $http.get(`${config.apiServer}/apis/controllers/controller?table=unit`)
-            .success((data, status, headers, config) => {
-
-                var timeFormat = d3.timeFormat("%H:%M:%S");
-                var parseTime = d3.timeParse("%H:%M:%S");
-
-                data = _.map(data, (infos, index) => {
-                    return {
-                        id: index,
-                        values: _.map(infos, (info) => {
-                            info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).second();
-                            info.ItemCurrentValue = +info.ItemCurrentValue;
-                            return info;
-                        })
-                    };
-                });
-
-                console.log(data);
-                
-                var svg = d3.select("svg"),
-                    margin = {top: 20, right: 80, bottom: 30, left: 50},
-                    width = svg.attr("width") - margin.left - margin.right,
-                    height = svg.attr("height") - margin.top - margin.bottom,
-                    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                var x = d3.scaleTime().range([0, width]),
-                    y = d3.scaleLinear().range([height, 0]),
-                    z = d3.scaleOrdinal(d3.schemeCategory10);
-
-                    console.log(x);
-
-                var line = d3.line()
-                    .curve(d3.curveBasis)
-                    .x(function(d) { 
-                        var result = x(d.ItemTimeStamp);
-                        // console.log(d.ItemTimeStamp);
-                        // console.log(x(d.ItemTimeStamp));
-                        return result; 
-                    })
-                    .y(function(d) { return y(d.ItemCurrentValue); });
-
-
-                x.domain(d3.extent(data, function(d) { 
-                    console.log(d);
-                    return d.ItemTimeStamp; 
-                }));
-                  y.domain([
-                    d3.min(data, function(c) { return d3.min(c.values, function(d) { return d.ItemCurrentValue; }); }),
-                    d3.max(data, function(c) { return d3.max(c.values, function(d) { return d.ItemCurrentValue; }); })
-                  ]);
-                  z.domain(data.map(function(c) { return c.id; }));
-
-                  g.append("g")
-                      .attr("class", "axis axis--x")
-                      .attr("transform", "translate(0," + height + ")")
-                      .call(d3.axisBottom(x));
-
-                  g.append("g")
-                      .attr("class", "axis axis--y")
-                      .call(d3.axisLeft(y))
-                    .append("text")
-                      .attr("transform", "rotate(-90)")
-                      .attr("y", 6)
-                      .attr("dy", "0.71em")
-                      .attr("fill", "#000")
-                      .text("Value");
-
-                  var city = g.selectAll(".city")
-                    .data(data)
-                    .enter().append("g")
-                      .attr("class", "city");
-console.log(3.1);
-                  city.append("path")
-                      .attr("class", "line")
-                      .attr("d", function(d) { 
-                            return line(d.values); // TODO 문제 있음
-                      })
-                      .style("stroke", function(d) { console.log(d); return z(d.id); });
-console.log(3.2);
-                  city.append("text")
-                      .datum(function(d) { console.log(d); return {id: d.id, value: d.values[d.values.length - 1]}; })
-                      .attr("transform", function(d) { console.log(d); return "translate(" + x(d.value.ItemTimeStamp) + "," + y(d.value.ItemCurrentValue) + ")"; }) // TODO 문제 있음
-                      .attr("x", 3)
-                      .attr("dy", "0.35em")
-                      .style("font", "10px sans-serif")
-                      .text(function(d) { return d.id; });
-console.log(4);
-        })
-        .error((data, status, headers, config) => {
-            console.log('err');
-        });
+        if (!vm.graph.data) {
+            confirm('출력할 데이터가 없습니다.');
+            return;
+        }
+        console.log('export');
+        // TODO Export
+        var defaultFileName = 'export.csv';
+        var type = 'application/vnd.ms-excel;charset=charset=utf-8';
+        var blob = new Blob(['a,b,c,d\n1,2,3,4\nq,,e,r'], { type: type });
+        FileSaver.saveAs(blob, defaultFileName);
     }
 
     vm.import = () => {
@@ -190,6 +95,8 @@ console.log(4);
               return info;
             });
 
+            var color = d3.scale.category10();
+
             var margin = {top: 20, right: 20, bottom: 30, left: 50},
                 width = 960 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
@@ -199,7 +106,7 @@ console.log(4);
                 .range([0, width]);
 
             var y = d3.scale.linear()
-                .range([height, 0]);
+                .range([height, 0 - height]);
 
             // var z = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -252,10 +159,26 @@ console.log(4);
                 .style("text-anchor", "end")
                 .text("Value");
 
-            svg.append("path")
-                .datum(data)
-                .attr("class", "line")
-                .attr("d", line);
+            // svg.append("path")
+            //     .datum(data)
+            //     .attr("class", "line")
+            //     .attr("d", line);
+
+            // Nest the entries by symbol
+            var dataNest = d3.nest()
+                .key(function(d) {return d.ItemID;})
+                .entries(data);
+
+            // Loop through each symbol / key
+            dataNest.forEach(function(d) {
+                svg.append("path")
+                    // .datum(target)
+                    .attr("class", "line")
+                    .style("stroke", function() {
+                        return d.color = color(d.key); 
+                    })
+                    .attr("d", line(d.values));
+            });
         })
         .error((data, status, headers, config) => {
             console.log('err');
