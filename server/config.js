@@ -2,8 +2,8 @@ module.exports = {
   db: {
     host: "localhost",
     database: "linkto",
-    username: "linkto",
-    password: "1234qwer",
+    username: "root",
+    password: "apstinc",
     pool: {
       max: 5,
       min: 0,
