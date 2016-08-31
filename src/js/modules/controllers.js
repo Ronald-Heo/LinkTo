@@ -48,11 +48,13 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     vm.category = [];
     vm.playList;    // 재생 여부
 
+    vm.controllers = [];
+
     vm.startDate = new Date();
     vm.startDate.setDate(vm.startDate.getDate() - 1);
     vm.endDate = new Date();
   }
-  
+
     $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
         .success((data, status, headers, config) => {
             vm.category = data;
@@ -97,7 +99,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         .success((data, status, headers, config) => {
 
             data = _.map(data, (info) => {
-              info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
+              info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('YYYY-MM-DD HH:mm:ss');
               info.ItemCurrentValue = +info.ItemCurrentValue;
               return info;
             });
@@ -108,7 +110,8 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 width = 960 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
 
-            var formatDate = d3.time.format("%X").parse;
+            var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
             var x = d3.time.scale()
                 .range([0, width]);
 
@@ -126,7 +129,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .orient("left");
             
             var line = d3.svg.line()
-                // .curve(d3.curveBasis)
                 .x(function(d) {
                   return x(formatDate(d.ItemTimeStamp)); 
                 })
@@ -134,11 +136,16 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                   return y(d.ItemCurrentValue); 
                 });
 
+            // Define the div for the tooltip
+            var div = d3.select("body").append("div") 
+                .attr("class", "tooltip")       
+                .style("opacity", 0);
+
             var svg = d3.select("canvers").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
               .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
             x.domain(d3.extent(data, 
               function(d) { 
@@ -171,15 +178,35 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .key(function(d) {return d.ItemID;})
                 .entries(data);
 
+                vm.controllers = [];
+
             // Loop through each symbol / key
             dataNest.forEach(function(d) {
+              vm.controllers.push(d);
+              
                 svg.append("path")
                     // .datum(target)
+                    .data(d.values)
                     .attr("class", "line")
                     .style("stroke", function() {
                         return d.color = color(d.key); 
                     })
-                    .attr("d", line(d.values));
+                    .attr("d", line(d.values))
+                    .on("mouseover", function(d) {    
+
+                      div.transition()    
+                          .duration(200)
+                          .style("opacity", .9);    
+                      div .html((d.ItemTimeStamp) + "<br/>"  + d.ItemCurrentValue)  
+                          .style("left", (d3.event.pageX) + "px")   
+                          .style("top", (d3.event.pageY - 28) + "px");  
+                    })          
+                    .on("mouseout", function(d) {   
+                      console.log(d);
+                        div.transition()    
+                            .duration(500)    
+                            .style("opacity", 0); 
+                    });
             });
         })
         .error((data, status, headers, config) => {

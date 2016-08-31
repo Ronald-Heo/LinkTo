@@ -18,35 +18,15 @@
 			종료시간<input id="end-date" class="form-control" type="datetime-local" ng-model="vm.endDate">	
 		</div>
 		<div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox" ng-click="vm.call()">SP</label>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox" ng-click="vm.getController()">CO</label>
-			</div>	
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox">PV</label>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox">P</label>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox">I</label>
-			</div>
-			<div class="checkbox-inline col-md-3">
-				<label><input type="checkbox">D</label>
+			<div class="" ng-repeat="controller in vm.controllers track by controller.key">
+				<label style="color: {{controller.color}}"><input type="checkbox">{{controller.key}}</label>
 			</div>
 		</div>
 		<div>
 			<h4 class="h4">Current Value</h4>
-			<pre>
-				<label>PV: <span ng-bind="vm.current.pv"></span></label><br/>
-				<label>SP: <span ng-bind="vm.current.sp"></span></label><br/>
-				<label>CO: <span ng-bind="vm.current.co"></span></label><br/>
-				<label>P: <span ng-bind="vm.current.p"></span></label><br/>
-				<label>I: <span ng-bind="vm.current.i"></span></label><br/>
-				<label>D: <span ng-bind="vm.current.d"></span></label><br/>
-			</pre>
+			<section>
+				<div ng-repeat="controller in vm.controllers track by controller.key">{{controller.key}}: <span ng-bind="controller.values[controller.values.length - 1].ItemCurrentValue"></span></div><br/>
+			</section>
 		</div>
 
 		<div>
