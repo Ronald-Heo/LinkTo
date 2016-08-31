@@ -43,13 +43,20 @@ controllers.controller('DBListController', function(){
 controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSaver', function($q, $state, $http, FileSaver){
     isLogined($q, $state, $http);
 	const vm = this;
-
+  
+  {
     vm.category = [];
     vm.playList;    // 재생 여부
 
+    vm.startDate = new Date();
+    vm.startDate.setDate(vm.startDate.getDate() - 1);
+    vm.endDate = new Date();
+  }
+  
     $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
         .success((data, status, headers, config) => {
             vm.category = data;
+            vm.selectedCategory = vm.category[0];
         })
         .error((data, status, headers, config) => {
             
@@ -85,7 +92,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         console.log('import');
         // TODO Import
         
-      $http.get(`${config.apiServer}/apis/controllers/controller?table=${vm.selectedCategory}`)
+      $http.get(`${config.apiServer}/apis/controllers/getControllerValues?table=${vm.selectedCategory}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
       // $http.get(`${config.apiServer}/apis/controllers/controller?table=unit`)
         .success((data, status, headers, config) => {
 
@@ -158,11 +165,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
                 .text("Value");
-
-            // svg.append("path")
-            //     .datum(data)
-            //     .attr("class", "line")
-            //     .attr("d", line);
 
             // Nest the entries by symbol
             var dataNest = d3.nest()

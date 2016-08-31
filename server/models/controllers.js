@@ -8,13 +8,16 @@ exports.getTableGroup = (callback) => {
 	conn.query('show tables;', callback);
 };
 
+exports.getControllerValues = (table, startDate, endDate, callback) => {
+	conn.query(`SELECT * FROM ${table} where ItemTimeStamp BETWEEN '${startDate}' AND '${endDate}' order by ItemTimeStamp, ItemID`, callback);
+};
+
 exports.getControllerData = (table, callback) => {
 	// var query = conn.query(`SELECT * FROM ${table} order by ItemTimeStamp, ItemID`, callback);
 	var query = conn.query(`SELECT * FROM ${table} order by ItemTimeStamp, ItemID`, callback);
 };
 
 // 기본 함수
-
 exports.select = (table, name, timestamp) => {
 	return conn.query(`SELECT * from '${table}' where name = '${name}' and timestamp = '${timestamp}'`, function(err, rows, fields) {
 		if (err)

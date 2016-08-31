@@ -3,6 +3,7 @@
 import _ from 'lodash';
 import controllers from '../../models/controllers';
 import express from 'express';
+import moment from 'moment';
 
 const router = express.Router();
  
@@ -16,24 +17,31 @@ router.use((req, res, next) => {
     // }
 });
 
+/** 테이블 종류 받으옴 */
 router.get('/getTableGroup', (req, res) => {
     controllers.getTableGroup(function(err, result) {
 		res.send(_.map(result, 'Tables_in_linkto'));
 	});
 });
 
-router.get('/controller', (req, res) => {
+/** 시간 필터링 */
+router.get('/getControllerValues', (req, res) => {
+    var startDate = moment(new Date(req.query.startDate)).format('YYYY-MM-DD HH:mm:ss');
+    var endDate = moment(new Date(req.query.endDate)).format('YYYY-MM-DD HH:mm:ss');
 
-	if (req.query.table) {
-		controllers.getControllerData(req.query.table, function(err, result) {
+   controllers.getControllerValues(req.query.table, startDate, endDate, function(err, result) {
+        res.send(result);
+    }); 
+});
+
+/** 기본이 되는 API  */
+router.get('/controller', (req, res) => {
+    console.log(req.query);
+	controllers.getControllerData(req.query.table, function(err, result) {
             // 필요한 데이터로 걸러냄 
             // res.send(_.groupBy(result, 'ItemID'));
             res.send(result);
         });
-	} else {
-        res.status(400);
-        res.send('no selected table');
-    }
 });
 
 export default router;

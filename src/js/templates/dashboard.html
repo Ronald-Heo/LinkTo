@@ -12,6 +12,10 @@
 	</div>
 	<div id="side-menu">
 		<div>
+			시작시간<input id="start-date" class="form-control" type="datetime-local" ng-model="vm.startDate">
+			종료시간<input id="end-date" class="form-control" type="datetime-local" ng-model="vm.endDate">	
+		</div>
+		<div>
 			<div class="checkbox-inline col-md-3">
 				<label><input type="checkbox" ng-click="vm.call()">SP</label>
 			</div>
