@@ -82,31 +82,21 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             return;
         }
 
-        console.log(vm.controllers);
-        var result = "";
+        var result = "Timestamp,";
 
-        for(var i=0;i < controllers.length;i++) {
-            result += controllers[i].key + ',';
+        for(var i=0;i < vm.controllers.length;i++) {
+            result += vm.controllers[i].key.toString() + ',';
         }
         
-        console.log(result);
-
         result += '\n';
-        
-        console.log(result);
-        
         for (var i = 0; i < vm.controllers[0].values.length; i++) {
-            for(var j=0;j < controllers.length;j++) {
-                result += controllers[j].values[i] + ',';
+            result += vm.controllers[0].values[i].ItemTimeStamp + ","
+            for(var j=0;j < vm.controllers.length;j++) {
+                result += vm.controllers[j].values[i].ItemCurrentValue.toString() + ',';
             }
             result += '\n';
-            
-            console.log(result);
         }
 
-        console.log(result);
-
-        // TODO Export
         var defaultFileName = 'export.csv';
         var type = 'application/vnd.ms-excel;charset=charset=utf-8';
         var blob = new Blob([result], { type: type });
@@ -237,6 +227,15 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     vm.getController = () => {
         // TODO 그래프 다시 그리기
     };
+
+    vm.test001 = () => {
+
+    };
+
+    vm.test002 = () => {
+
+    };
+
 }]);
 
 controllers.controller('LoginController', ['$http', '$state', function($http, $state){
