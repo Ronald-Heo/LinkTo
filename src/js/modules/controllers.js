@@ -48,7 +48,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         vm.controllers = [];
 
         vm.startDate = new Date();
-        vm.startDate.setDate(vm.startDate.getDate() - 1);
+        vm.startDate.setDate(vm.startDate.getDate() - 365);
         vm.endDate = new Date();
     }
 
@@ -194,29 +194,33 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
                 // Loop through each symbol / key
                 dataNest.forEach(function(d) {
+                    d.visible = true;
+                    d.key = d.key.split('.').join('-');
                     vm.controllers.push(d);
-                  
+
                     svg.append("path")
                         .data(d.values)
                         .attr("class", "line")
+                        .attr("id", `${d.key}`)
                         .style("stroke", function() {
                             return d.color = color(d.key); 
                         })
                         .attr("d", line(d.values))
-                        .on("mouseover", function(d) {    
-                            div.transition()    
-                                .duration(200)
-                                .style("opacity", .9);    
-                            div .html((d.ItemTimeStamp) + "<br/>"  + d.ItemCurrentValue)  
-                                .style("left", (d3.event.pageX) + "px")   
-                                .style("top", (d3.event.pageY - 28) + "px");  
-                        })          
-                        .on("mouseout", function(d) {   
-                            console.log(d);
-                            div.transition()    
-                                .duration(500)    
-                                .style("opacity", 0); 
-                        });
+                        // .on("mouseover", function(d) {    
+                        //     div.transition()    
+                        //         .duration(200)
+                        //         .style("opacity", .9);    
+                        //     div .html((d.ItemTimeStamp) + "<br/>"  + d.ItemCurrentValue)  
+                        //         .style("left", (d3.event.pageX) + "px")   
+                        //         .style("top", (d3.event.pageY - 28) + "px");  
+                        // })          
+                        // .on("mouseout", function(d) {   
+                        //     console.log(d);
+                        //     div.transition()    
+                        //         .duration(500)    
+                        //         .style("opacity", 0); 
+                        // })
+                        ;
                 });
         })
         .error((data, status, headers, config) => {
@@ -226,6 +230,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
     vm.getController = () => {
         // TODO 그래프 다시 그리기
+    };
+
+    vm.setVisible = (controller) => {
+        var opacity = controller.visible ? 1 : 0;
+        var selectLine = d3.select(`#${controller.key}`);
+        d3.select(`#${controller.key}`).style("opacity", opacity);
     };
 
     vm.test001 = () => {

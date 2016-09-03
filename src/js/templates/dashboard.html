@@ -18,7 +18,7 @@
 		</div>
 		<div>
 			<div class="" ng-repeat="controller in vm.controllers track by controller.key">
-				<label style="color: {{controller.color}}"><input type="checkbox">{{controller.key}}</label>
+				<label style="color: {{controller.color}}"><input type="checkbox" ng-model="controller.visible" ng-click="vm.setVisible(controller)">{{controller.key}}</label>
 			</div>
 		</div>
 		<div>
