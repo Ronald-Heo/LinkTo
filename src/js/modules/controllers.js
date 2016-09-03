@@ -129,12 +129,17 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .orient("left");
             
             var line = d3.svg.line()
+                .interpolate("step-after")
                 .x(function(d) {
                   return x(formatDate(d.ItemTimeStamp)); 
                 })
                 .y(function(d) { 
                   return y(d.ItemCurrentValue); 
                 });
+
+            var zoom = d3.behavior.zoom()
+                .on("zoom", draw);
+            
 
             // Define the div for the tooltip
             var div = d3.select("body").append("div") 
@@ -158,6 +163,10 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                return d.ItemCurrentValue; 
              }));
 
+            zoom.x(x);
+
+            
+
             svg.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height + ")")
@@ -173,6 +182,26 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 .style("text-anchor", "end")
                 .text("Value");
 
+             svg.append("rect")
+                .attr("class", "pane")
+                .attr("width", width)
+                .attr("height", height)
+                .call(zoom);
+
+            svg.select("path.line").data([dataOne]);
+                draw();
+            
+            
+
+                function draw() {
+                  svg.select("g.x.axis").call(xAxis);
+                  svg.select("g.y.axis").call(yAxis);
+                  svg.select("path.line").attr("d", line);
+                } 
+                
+                
+    
+
             // Nest the entries by symbol
             var dataNest = d3.nest()
                 .key(function(d) {return d.ItemID;})
@@ -180,10 +209,15 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
                 vm.controllers = [];
 
+            console.log(3);
+
+            var dataOne = dataNest[0].values;
+            console.log(dataOne);
+
+
             // Loop through each symbol / key
             dataNest.forEach(function(d) {
               vm.controllers.push(d);
-              
                 svg.append("path")
                     // .datum(target)
                     .data(d.values)
@@ -191,23 +225,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .style("stroke", function() {
                         return d.color = color(d.key); 
                     })
-                    .attr("d", line(d.values))
-                    .on("mouseover", function(d) {    
+                    .attr("d", line(d.values));
 
-                      div.transition()    
-                          .duration(200)
-                          .style("opacity", .9);    
-                      div .html((d.ItemTimeStamp) + "<br/>"  + d.ItemCurrentValue)  
-                          .style("left", (d3.event.pageX) + "px")   
-                          .style("top", (d3.event.pageY - 28) + "px");  
-                    })          
-                    .on("mouseout", function(d) {   
-                      console.log(d);
-                        div.transition()    
-                            .duration(500)    
-                            .style("opacity", 0); 
-                    });
-            });
+            });     
+            
+
+                 
         })
         .error((data, status, headers, config) => {
             console.log('err');
