@@ -117,8 +117,11 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
                 var color = d3.scale.category10();
 
+                var parentRec = d3.select('#content-dashboard');
+                console.log(document.getElementById("content-dashboard").offsetWidth );
+
                 var margin = {top: 20, right: 20, bottom: 30, left: 50},
-                    width = 960 - margin.left - margin.right,
+                    width = document.getElementById("content-dashboard").offsetWidth - margin.left - margin.right,
                     height = 500 - margin.top - margin.bottom;
 
                 var formatDate = d3.time.format("%X").parse;
@@ -151,7 +154,14 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 // Define the div for the tooltip
                 var div = d3.select("body").append("div") 
                     .attr("class", "tooltip")       
-                    .style("opacity", 0);
+                    .style("opacity", 0)
+                    .classed("svg-container", true) //container class to make it responsive
+                    .append("svg")
+                    //responsive SVG needs these 2 attributes and no width and height attr
+                    .attr("preserveAspectRatio", "xMinYMin meet")
+                    .attr("viewBox", "0 0 600 400")
+                    //class to make it responsive
+                    .classed("svg-content-responsive", true); ;
 
                 var svg = d3.select("canvers").append("svg")
                     .attr("width", width + margin.left + margin.right)
