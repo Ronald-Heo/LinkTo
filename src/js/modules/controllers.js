@@ -110,7 +110,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             .success((data, status, headers, config) => {
 
                 data = _.map(data, (info) => {
-                    info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('YYYY-MM-DD HH:mm:ss');
+                    info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
                     info.ItemCurrentValue = +info.ItemCurrentValue;
                     return info;
                 });
@@ -121,13 +121,13 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     width = 960 - margin.left - margin.right,
                     height = 500 - margin.top - margin.bottom;
 
-                var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+                var formatDate = d3.time.format("%X").parse;
 
                 var x = d3.time.scale()
                     .range([0, width]);
 
                 var y = d3.scale.linear()
-                    .range([height, 0 - height]);
+                    .range([height, 0]);
 
                 var xAxis = d3.svg.axis()
                     .scale(x)
@@ -143,7 +143,10 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     })
                     .y(function(d) { 
                         return y(d.ItemCurrentValue); 
-                    });
+                    })
+                    .interpolate("step-after");
+
+                var zoom = d3.behavior.zoom().on("zoom", draw); 
 
                 // Define the div for the tooltip
                 var div = d3.select("body").append("div") 
@@ -198,6 +201,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     }
                 ));
 
+                zoom.x(x);
+                zoom.y(y);
+                
+                svg.select("path.line").data([data]);
+                draw();
+
                 svg.append("g")
                     .attr("class", "x axis")
                     .attr("transform", "translate(0," + height + ")")
@@ -213,7 +222,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .style("text-anchor", "end")
                     .text("Value");
 
-                // Nest the entries by symbol
+                svg.append("rect")
+                    .attr("class", "pane")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .call(zoom);
+
                 var dataNest = d3.nest()
                     .key(function(d) {
                         return d.ItemID;
@@ -222,7 +236,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
                 vm.controllers = [];
 
-                // Loop through each symbol / key
                 dataNest.forEach(function(d) {
                     d.visible = true;
                     d.key = d.key.split('.').join('-');
@@ -230,13 +243,29 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
                     svg.append("path")
                         .data(d.values)
-                        .attr("class", "line")
+                        .attr("class", `line line-${d.key}`)
                         .attr("id", `${d.key}`)
                         .style("stroke", function() {
                             return d.color = color(d.key); 
                         })
                         .attr("d", line(d.values));
                 });
+
+                function draw() {
+                    svg.select("g.x.axis").call(xAxis);
+                    svg.select("g.y.axis").call(yAxis);
+                    var dataNest = d3.nest()
+                        .key(function(d) {
+                            return d.ItemID;
+                        })
+                        .entries(data);
+                    dataNest.forEach(function(d) {
+                        d.key = d.key.split('.').join('-');
+                        svg.select(`path.line-${d.key}`).attr("d", line(d.values));
+                    });
+
+                }
+
         })
         .error((data, status, headers, config) => {
             console.log('err');
