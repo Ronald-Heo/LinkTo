@@ -153,41 +153,11 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .attr("class", "tooltip")       
                     .style("opacity", 0);
 
-                var zoom = d3.behavior.zoom()
-                    .scaleExtent([1, 10])
-                    .on("zoom", zoomed);
-
-                var drag = d3.behavior.drag()
-                    .origin(function(d) { 
-                        return d; 
-                    })
-                    .on("dragstart", dragstarted)
-                    .on("drag", dragged)
-                    .on("dragend", dragended);
-
-                function zoomed() {
-                    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-                }
-
-                function dragstarted(d) {
-                    d3.event.sourceEvent.stopPropagation();
-                    d3.select(this).classed("dragging", true);
-                }
-
-                function dragged(d) {
-                    d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-                }
-
-                function dragended(d) {
-                    d3.select(this).classed("dragging", false);
-                }
-
                 var svg = d3.select("canvers").append("svg")
                     .attr("width", width + margin.left + margin.right)
                     .attr("height", height + margin.top + margin.bottom)
                     .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                    .call(drag);
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                 x.domain(d3.extent(data, 
                     function(d) { 
@@ -265,7 +235,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     });
 
                 }
-
         })
         .error((data, status, headers, config) => {
             console.log('err');
