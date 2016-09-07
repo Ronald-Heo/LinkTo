@@ -218,7 +218,13 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                         .style("stroke", function() {
                             return d.color = color(d.key); 
                         })
-                        .attr("d", line(d.values));
+                        .attr("d", line(d.values))
+                        .transition()
+                        .duration(2000)
+                        .attrTween("stroke-dasharray", function() {
+                            var len = this.getTotalLength();
+                            return function(t) { return (d3.interpolateString("0," + len, len + ",0"))(t) };
+                        });
                 });
 
                 function draw() {
