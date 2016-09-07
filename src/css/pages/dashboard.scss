@@ -57,9 +57,15 @@
 	}
 
 	.x.axis path {
-	  display: none;
+	  /*display: none;*/
 	}
 
+	.pane {
+	  cursor: move;
+	  fill: none;
+	  pointer-events: all;
+	}
+	
 	.line {
 	  fill: none;
 	  stroke: steelblue;
