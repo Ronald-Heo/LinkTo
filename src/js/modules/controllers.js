@@ -56,7 +56,14 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         vm.play = () => {
             vm.playList = setInterval(function() {
                     // TODO 데이터 API 호출 및 그래프 업데이트
-                }, 3000);
+                    $http.get(`${config.apiServer}/apis/controllers/getControllerValue?table=${vm.selectedCategory}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
+                        .success((data, status, headers, config) => {
+                            console.log(data);
+                        })
+                        .error((data, status, headers, config) => {
+                            console.log('err');
+                        });
+                }, 1000);
         };
 
         vm.stop = () => {
@@ -64,8 +71,8 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 clearInterval(vm.playList);
             }
         }
-
     }
+    
     // DB Table 조회
     $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
         .success((data, status, headers, config) => {

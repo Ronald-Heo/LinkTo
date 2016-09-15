@@ -34,6 +34,18 @@ router.get('/getControllerValues', (req, res) => {
     }); 
 });
 
+/** 현재 시간 데이터 */
+router.get('/getControllerValue', (req, res) => {
+    var now = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
+
+    now = '2016-08-16 10:09:17';    // TODO 테스트중
+
+    controllers.getControllerValue(req.query.table, now, function(err, result) {
+        res.send(result);
+    }); 
+});
+
+
 /** 기본이 되는 API  */
 router.get('/controller', (req, res) => {
     console.log(req.query);
