@@ -42,17 +42,19 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 	const vm = this;
 
     {   // init
-        vm.category = [];
+        vm.category = [];   // 테이블 명
+        
         vm.playList;    // 재생 여부
 
-        vm.controllers = [];
+        vm.controllers = [];    // Export용 데이터
 
+        // 시간 필터링
         vm.startDate = new Date();
         vm.startDate.setDate(vm.startDate.getDate() - 365);
         vm.endDate = new Date();
     }
 
-    {   // method
+    {   // 재생기능 method
         vm.play = () => {
             vm.playList = setInterval(function() {
                     // TODO 데이터 API 호출 및 그래프 업데이트
@@ -71,47 +73,55 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 clearInterval(vm.playList);
             }
         }
+
+        vm.setVisible = (controller) => {
+            var opacity = controller.visible ? 1 : 0;
+            var selectLine = d3.select(`#${controller.key}`);
+            d3.select(`#${controller.key}`).style("opacity", opacity);
+        };
+
+        vm.export = () => {
+            if (!vm.controllers) {
+                confirm('출력할 데이터가 없습니다.');
+                return;
+            }
+
+            var result = "Timestamp,";
+
+            for(var i=0;i < vm.controllers.length;i++) {
+                result += vm.controllers[i].key.toString() + ',';
+            }
+            
+            result += '\n';
+            for (var i = 0; i < vm.controllers[0].values.length; i++) {
+                result += vm.controllers[0].values[i].ItemTimeStamp + ","
+                for(var j=0;j < vm.controllers.length;j++) {
+                    result += vm.controllers[j].values[i].ItemCurrentValue.toString() + ',';
+                }
+                result += '\n';
+            }
+
+            var defaultFileName = 'export.csv';
+            var type = 'application/vnd.ms-excel;charset=charset=utf-8';
+            var blob = new Blob([result], { type: type });
+            FileSaver.saveAs(blob, defaultFileName);
+        }
     }
     
-    // DB Table 조회
-    $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
-        .success((data, status, headers, config) => {
-            vm.category = data;
-            vm.selectedCategory = vm.category[0];
-        })
-        .error((data, status, headers, config) => {
-            
-        });
-
-    vm.export = () => {
-        if (!vm.controllers) {
-            confirm('출력할 데이터가 없습니다.');
-            return;
-        }
-
-        var result = "Timestamp,";
-
-        for(var i=0;i < vm.controllers.length;i++) {
-            result += vm.controllers[i].key.toString() + ',';
-        }
-        
-        result += '\n';
-        for (var i = 0; i < vm.controllers[0].values.length; i++) {
-            result += vm.controllers[0].values[i].ItemTimeStamp + ","
-            for(var j=0;j < vm.controllers.length;j++) {
-                result += vm.controllers[j].values[i].ItemCurrentValue.toString() + ',';
-            }
-            result += '\n';
-        }
-
-        var defaultFileName = 'export.csv';
-        var type = 'application/vnd.ms-excel;charset=charset=utf-8';
-        var blob = new Blob([result], { type: type });
-        FileSaver.saveAs(blob, defaultFileName);
+    {   // onLoaded
+        // DB Table 조회
+        $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
+            .success((data, status, headers, config) => {
+                vm.category = data;
+                vm.selectedCategory = vm.category[0];
+            })
+            .error((data, status, headers, config) => {
+                
+            });
     }
 
-    vm.import = () => {
-        console.log('import');
+    vm.search = () => {
+        console.log('search');
         
         $http.get(`${config.apiServer}/apis/controllers/getControllerValues?table=${vm.selectedCategory}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
             .success((data, status, headers, config) => {
@@ -263,25 +273,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             console.log('err');
         });
     }
-
-    vm.getController = () => {
-        // TODO 그래프 다시 그리기
-    };
-
-    vm.setVisible = (controller) => {
-        var opacity = controller.visible ? 1 : 0;
-        var selectLine = d3.select(`#${controller.key}`);
-        d3.select(`#${controller.key}`).style("opacity", opacity);
-    };
-
-    vm.test001 = () => {
-
-    };
-
-    vm.test002 = () => {
-
-    };
-
 }]);
 
 controllers.controller('LoginController', ['$http', '$state', function($http, $state){
