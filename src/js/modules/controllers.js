@@ -43,7 +43,8 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
     {   // init
         vm.category = [];   // 테이블 명
-        
+        vm.data = [];   // 그래프 데이터
+
         vm.playList;    // 재생 여부
 
         vm.controllers = [];    // Export용 데이터
@@ -52,6 +53,10 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         vm.startDate = new Date();
         vm.startDate.setDate(vm.startDate.getDate() - 365);
         vm.endDate = new Date();
+
+        // 테스트용
+        vm.startDate = new Date(2016, 7, 16, 10, 9, 17);
+        vm.endDate = new Date(2016, 7, 16, 10, 20, 17);
     }
 
     {   // 재생기능 method
@@ -60,10 +65,13 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     // TODO 데이터 API 호출 및 그래프 업데이트
                     $http.get(`${config.apiServer}/apis/controllers/getControllerValue?table=${vm.selectedCategory}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
                         .success((data, status, headers, config) => {
-                            console.log(data);
+                            var temp = vm.graph.init(data);
+                            vm.data = _.concat(vm.data, temp);
+                            vm.graph.draw();
                         })
                         .error((data, status, headers, config) => {
                             console.log('err');
+                            vm.stop();
                         });
                 }, 1000);
         };
@@ -120,44 +128,61 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             });
     }
 
+    {   // graph method
+        vm.graph = {};
+        vm.graph.color = d3.scale.category10();
+
+        vm.graph.margin = {top: 20, right: 20, bottom: 30, left: 50};
+        vm.graph.width = document.getElementById("content-dashboard").offsetWidth - vm.graph.margin.left - vm.graph.margin.right;
+        vm.graph.height = 500 - vm.graph.margin.top - vm.graph.margin.bottom;
+
+        vm.graph.init = (data) => {
+            return _.map(data, (info) => {
+                info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
+                info.ItemCurrentValue = +info.ItemCurrentValue;
+                return info;
+            });
+        };
+
+        vm.graph.draw = () => {
+            vm.graph.svg.select("g.x.axis").call(vm.graph.xAxis);
+            vm.graph.svg.select("g.y.axis").call(vm.graph.yAxis);
+            var dataNest = d3.nest()
+                .key(function(d) {
+                    return d.ItemID;
+                })
+                .entries(vm.data);
+            dataNest.forEach(function(d) {
+                d.key = d.key.split('.').join('-');
+                vm.graph.svg.select(`path.line-${d.key}`).attr("d", vm.graph.line(d.values));
+            });
+        };
+    }
+
     vm.search = () => {
         console.log('search');
         
         $http.get(`${config.apiServer}/apis/controllers/getControllerValues?table=${vm.selectedCategory}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
             .success((data, status, headers, config) => {
-
-                data = _.map(data, (info) => {
-                    info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
-                    info.ItemCurrentValue = +info.ItemCurrentValue;
-                    return info;
-                });
-
-                var color = d3.scale.category10();
-
-                var parentRec = d3.select('#content-dashboard');
-                console.log(document.getElementById("content-dashboard").offsetWidth );
-
-                var margin = {top: 20, right: 20, bottom: 30, left: 50},
-                    width = document.getElementById("content-dashboard").offsetWidth - margin.left - margin.right,
-                    height = 500 - margin.top - margin.bottom;
+                vm.data = vm.graph.init(data);
 
                 var formatDate = d3.time.format("%X").parse;
 
                 var x = d3.time.scale()
-                    .range([0, width]);
+                    .range([0, vm.graph.width]);
 
                 var y = d3.scale.linear()
-                    .range([height, 0]);
+                    .range([vm.graph.height, 0]);
 
-                var xAxis = d3.svg.axis()
+                vm.graph.xAxis = d3.svg.axis()
                     .scale(x)
                     .orient("bottom");
 
-                var yAxis = d3.svg.axis()
+                vm.graph.yAxis = d3.svg.axis()
                     .scale(y)
                     .orient("left");
                 
-                var line = d3.svg.line()
+                vm.graph.line = d3.svg.line()
                     .x(function(d) {
                         return x(formatDate(d.ItemTimeStamp)); 
                     })
@@ -166,33 +191,22 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     })
                     .interpolate("step-after");
 
-                var zoom = d3.behavior.zoom().on("zoom", draw); 
-
-                // Define the div for the tooltip
-                var div = d3.select("body").append("div") 
-                    .attr("class", "tooltip")       
-                    .style("opacity", 0)
-                    .classed("svg-container", true) //container class to make it responsive
-                    .append("svg")
-                    //responsive SVG needs these 2 attributes and no width and height attr
-                    .attr("preserveAspectRatio", "xMinYMin meet")
-                    .attr("viewBox", "0 0 600 400")
-                    //class to make it responsive
-                    .classed("svg-content-responsive", true); ;
-
-                var svg = d3.select("canvers").append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
+                vm.graph.svg = d3.select("canvers").append("svg")
+                    .attr("width", vm.graph.width + vm.graph.margin.left + vm.graph.margin.right)
+                    .attr("height", vm.graph.height + vm.graph.margin.top + vm.graph.margin.bottom)
                     .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                    .attr("transform", "translate(" + vm.graph.margin.left + "," + vm.graph.margin.top + ")");
 
-                x.domain(d3.extent(data, 
+                // 줌기능 설정
+                var zoom = d3.behavior.zoom().on("zoom", vm.graph.draw); 
+
+                x.domain(d3.extent(vm.data, 
                     function(d) { 
                         return formatDate(d.ItemTimeStamp);
                     }
                 ));
 
-                y.domain(d3.extent(data, 
+                y.domain(d3.extent(vm.data, 
                     function(d) {
                         return d.ItemCurrentValue; 
                     }
@@ -201,17 +215,17 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 zoom.x(x);
                 zoom.y(y);
                 
-                svg.select("path.line").data([data]);
-                draw();
+                vm.graph.svg.select("path.line").data([vm.data]);
+                vm.graph.draw();
 
-                svg.append("g")
+                vm.graph.svg.append("g")
                     .attr("class", "x axis")
-                    .attr("transform", "translate(0," + height + ")")
-                    .call(xAxis);
+                    .attr("transform", "translate(0," + vm.graph.height + ")")
+                    .call(vm.graph.xAxis);
 
-                svg.append("g")
+                vm.graph.svg.append("g")
                     .attr("class", "y axis")
-                    .call(yAxis)
+                    .call(vm.graph.yAxis)
                     .append("text")
                     .attr("transform", "rotate(-90)")
                     .attr("y", 6)
@@ -219,33 +233,35 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .style("text-anchor", "end")
                     .text("Value");
 
-                svg.append("rect")
+                vm.graph.svg.append("rect")
                     .attr("class", "pane")
-                    .attr("width", width)
-                    .attr("height", height)
+                    .attr("width", vm.graph.width)
+                    .attr("height", vm.graph.height)
                     .call(zoom);
 
                 var dataNest = d3.nest()
                     .key(function(d) {
                         return d.ItemID;
                     })
-                    .entries(data);
+                    .entries(vm.data);
 
+                // 엑셀 출력을 위한 저장
                 vm.controllers = [];
 
+                // 초기 데이터 설정
                 dataNest.forEach(function(d) {
                     d.visible = true;
                     d.key = d.key.split('.').join('-');
                     vm.controllers.push(d);
 
-                    svg.append("path")
+                    vm.graph.svg.append("path")
                         .data(d.values)
                         .attr("class", `line line-${d.key}`)
                         .attr("id", `${d.key}`)
                         .style("stroke", function() {
-                            return d.color = color(d.key); 
+                            return d.color = vm.graph.color(d.key); 
                         })
-                        .attr("d", line(d.values))
+                        .attr("d", vm.graph.line(d.values))
                         .transition()
                         .duration(2000)
                         .attrTween("stroke-dasharray", function() {
@@ -261,12 +277,11 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                         .key(function(d) {
                             return d.ItemID;
                         })
-                        .entries(data);
+                        .entries(vm.data);
                     dataNest.forEach(function(d) {
                         d.key = d.key.split('.').join('-');
                         svg.select(`path.line-${d.key}`).attr("d", line(d.values));
                     });
-
                 }
         })
         .error((data, status, headers, config) => {

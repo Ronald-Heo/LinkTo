@@ -26,19 +26,25 @@ router.get('/getTableGroup', (req, res) => {
 
 /** 시간 필터링 */
 router.get('/getControllerValues', (req, res) => {
-    var startDate = moment(new Date(req.query.startDate)).format('YYYY-MM-DD HH:mm:ss');
-    var endDate = moment(new Date(req.query.endDate)).format('YYYY-MM-DD HH:mm:ss');
+    var startDate = moment(new Date(req.query.startDate)).subtract(moment.duration(9, 'h')).format('YYYY-MM-DD HH:mm:ss');
+    var endDate = moment(new Date(req.query.endDate)).subtract(moment.duration(9, 'h')).format('YYYY-MM-DD HH:mm:ss');
 
-   controllers.getControllerValues(req.query.table, startDate, endDate, function(err, result) {
+    console.log(req.query.startDate);
+    console.log(startDate);
+
+    controllers.getControllerValues(req.query.table, startDate, endDate, function(err, result) {
         res.send(result);
     }); 
 });
 
+var temp = 1;
+
 /** 현재 시간 데이터 */
 router.get('/getControllerValue', (req, res) => {
-    var now = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
-
-    now = '2016-08-16 10:09:17';    // TODO 테스트중
+    var now = moment(new Date(2016, 7, 16, 10, 20, 17)).add(moment.duration(temp, 's')).format('YYYY-MM-DD HH:mm:ss');
+    
+    console.log(now);
+    temp = temp+1;
 
     controllers.getControllerValue(req.query.table, now, function(err, result) {
         res.send(result);
