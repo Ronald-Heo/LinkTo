@@ -53,20 +53,14 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         vm.startDate = new Date();
         vm.startDate.setDate(vm.startDate.getDate() - 365);
         vm.endDate = new Date();
-
-        // 테스트용
-        vm.startDate = new Date(2016, 7, 16, 10, 9, 17);
-        vm.endDate = new Date(2016, 7, 16, 10, 20, 17);
     }
 
     {   // 재생기능 method
         vm.play = () => {
             vm.playList = setInterval(function() {
-                    // TODO 데이터 API 호출 및 그래프 업데이트
                     $http.get(`${config.apiServer}/apis/controllers/getControllerValue?table=${vm.selectedCategory}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
                         .success((data, status, headers, config) => {
-                            var temp = vm.graph.init(data);
-                            vm.data = _.concat(vm.data, temp);
+                            vm.data = _.concat(vm.data, vm.graph.init(data));
                             vm.graph.draw();
                         })
                         .error((data, status, headers, config) => {
