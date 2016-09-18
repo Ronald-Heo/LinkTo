@@ -3,7 +3,10 @@
 import apis from './routes/apis';
 import bodyParser from 'body-parser';
 import express from 'express';
+import moment from 'moment';
 import session from 'express-session';
+
+moment.locale('ko');
 
 const app = express();
 
