@@ -8,13 +8,12 @@ import moment from 'moment';
 const router = express.Router();
  
 router.use((req, res, next) => {
-    next(); // TODO 테스트용
-    // if(req.session.user) {
-    //     next();
-    // } else {
-    //     res.status(404);
-    //     res.send('not logined');
-    // }
+    if(req.session.user) {
+        next();
+    } else {
+        res.status(404);
+        res.send('not logined');
+    }
 });
 
 /** 테이블 종류 받으옴 */

@@ -38,7 +38,7 @@ controllers.controller('DBListController', function(){
 });
 
 controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSaver', function($q, $state, $http, FileSaver){
-    // isLogined($q, $state, $http);    // TODO dev
+    isLogined($q, $state, $http);
 	const vm = this;
 
     {   // init
