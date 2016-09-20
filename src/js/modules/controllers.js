@@ -114,28 +114,49 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     }
     
     {   // onLoaded
-        // DB Table 조회
-        $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
-            .success((data, status, headers, config) => {
-                vm.category1 = data;
-                vm.selectedCategory = vm.category1[0];
-            })
-            .error((data, status, headers, config) => {
-                
-            });
+        $http.get(`${config.apiServer}/apis/categories/category1`)
+                .success((data, status, headers, config) => {
+                    console.log(data);
+                    vm.category1 = data;
+                })
+                .error((data, status, headers, config) => {
+                    
+                });
     }
 
     {   // 카테고리 변경
         vm.category1Changed = () => {
+            console.log(1);
 
+            vm.category2 = [];
+            vm.category3 = [];
+
+            $http.get(`${config.apiServer}/apis/categories/category2?category1=${vm.selectedCategory1}`)
+                .success((data, status, headers, config) => {
+                    console.log(data);
+                    vm.category2 = data;
+                })
+                .error((data, status, headers, config) => {
+                    
+                });
         };
 
         vm.category2Changed = () => {
+            console.log(2);
+            vm.category3 = [];
 
+            $http.get(`${config.apiServer}/apis/categories/category3?category1=${vm.selectedCategory1}&category2=${vm.selectedCategory2}`)
+                .success((data, status, headers, config) => {
+                    console.log(data);
+                    vm.category3 = data;
+                })
+                .error((data, status, headers, config) => {
+                    
+                });
         };
 
         vm.category3Changed = () => {
-
+            console.log(3);
         };
     }
 
@@ -173,7 +194,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     vm.search = () => {
         console.log('search');
         
-        $http.get(`${config.apiServer}/apis/controllers/getControllerValues?table=${vm.selectedCategory}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
+        if (!(vm.selectedCategory1 && vm.selectedCategory2 && vm.selectedCategory3)) {
+            alert('분류를 선택해주세요');
+            return;
+        }
+
+        $http.get(`${config.apiServer}/apis/controllers/getControllerValues?category1=${vm.selectedCategory1}&category2=${vm.selectedCategory2}&category3=${vm.selectedCategory3}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
             .success((data, status, headers, config) => {
                 vm.data = vm.graph.init(data);
 

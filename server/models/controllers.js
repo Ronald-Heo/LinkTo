@@ -8,8 +8,9 @@ exports.getTableGroup = (callback) => {
 	conn.query('show tables;', callback);
 };
 
-exports.getControllerValues = (table, startDate, endDate, callback) => {
-	conn.query(`SELECT * FROM ${table} where ItemTimeStamp BETWEEN '${startDate}' AND '${endDate}' order by ItemTimeStamp, ItemID`, callback);
+exports.getControllerValues = (table, category1, category2, category3, startDate, endDate, callback) => {
+	var itemName = category1 + '.' + category2 + '.' + category3;
+	conn.query(`SELECT * FROM ${table} where ItemID = '${itemName}' AND ItemTimeStamp BETWEEN '${startDate}' AND '${endDate}' order by ItemTimeStamp, ItemID`, callback);
 };
 
 exports.getControllerData = (table, callback) => {

@@ -29,7 +29,11 @@ router.get('/getControllerValues', (req, res) => {
     var startDate = moment(new Date(req.query.startDate)).subtract(moment.duration(9, 'h')).format('YYYY-MM-DD HH:mm:ss');
     var endDate = moment(new Date(req.query.endDate)).subtract(moment.duration(9, 'h')).format('YYYY-MM-DD HH:mm:ss');
 
-    controllers.getControllerValues(req.query.table, startDate, endDate, function(err, result) {
+    var category1 = req.query.category1;
+    var category2 = req.query.category2;
+    var category3 = req.query.category3;
+
+    controllers.getControllerValues('unit', category1, category2, category3, startDate, endDate, function(err, result) {
         res.send(result);
     }); 
 });
