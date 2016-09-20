@@ -42,7 +42,10 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 	const vm = this;
 
     {   // init
-        vm.category = [];   // 테이블 명
+        vm.category1 = [];   // 분류1
+        vm.category2 = [];   // 분류1
+        vm.category3 = [];   // 분류1
+
         vm.data = [];   // 그래프 데이터
 
         vm.playList;    // 재생 여부
@@ -114,12 +117,26 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         // DB Table 조회
         $http.get(`${config.apiServer}/apis/controllers/getTableGroup`)
             .success((data, status, headers, config) => {
-                vm.category = data;
-                vm.selectedCategory = vm.category[0];
+                vm.category1 = data;
+                vm.selectedCategory = vm.category1[0];
             })
             .error((data, status, headers, config) => {
                 
             });
+    }
+
+    {   // 카테고리 변경
+        vm.category1Changed = () => {
+
+        };
+
+        vm.category2Changed = () => {
+
+        };
+
+        vm.category3Changed = () => {
+
+        };
     }
 
     {   // graph method
