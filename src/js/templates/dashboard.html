@@ -27,7 +27,7 @@
 		<div>
 			<h4 class="h4">Current Value</h4>
 			<section>
-				<div ng-repeat="controller in vm.controllers track by controller.key">{{controller.key}}: <span ng-bind="controller.values[controller.values.length - 1].ItemCurrentValue"></span></div><br/>
+				<div ng-repeat="controller in vm.controllers track by controller.key">{{controller.key}}: <span id="current-{{controller.key}}"></span></div><br/>
 			</section>
 		</div>
 

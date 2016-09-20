@@ -47,6 +47,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         vm.category3 = [];   // 분류1
 
         vm.data = [];   // 그래프 데이터
+        vm.selectedData = [];   // 마우스 오버된 데이터
 
         vm.playList;    // 재생 여부
 
@@ -116,7 +117,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     {   // onLoaded
         $http.get(`${config.apiServer}/apis/categories/category1`)
                 .success((data, status, headers, config) => {
-                    console.log(data);
                     vm.category1 = data;
                 })
                 .error((data, status, headers, config) => {
@@ -126,14 +126,11 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
     {   // 카테고리 변경
         vm.category1Changed = () => {
-            console.log(1);
-
             vm.category2 = [];
             vm.category3 = [];
 
             $http.get(`${config.apiServer}/apis/categories/category2?category1=${vm.selectedCategory1}`)
                 .success((data, status, headers, config) => {
-                    console.log(data);
                     vm.category2 = data;
                 })
                 .error((data, status, headers, config) => {
@@ -142,12 +139,10 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         };
 
         vm.category2Changed = () => {
-            console.log(2);
             vm.category3 = [];
 
             $http.get(`${config.apiServer}/apis/categories/category3?category1=${vm.selectedCategory1}&category2=${vm.selectedCategory2}`)
                 .success((data, status, headers, config) => {
-                    console.log(data);
                     vm.category3 = data;
                 })
                 .error((data, status, headers, config) => {
@@ -156,7 +151,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         };
 
         vm.category3Changed = () => {
-            console.log(3);
         };
     }
 
@@ -187,6 +181,18 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             dataNest.forEach(function(d) {
                 d.key = d.key.split('.').join('-');
                 vm.graph.svg.select(`path.line-${d.key}`).attr("d", vm.graph.line(d.values));
+            });
+        };
+
+        vm.graph.setSelectedData = (datas) => {
+            vm.selectedData = _.map(datas, (data) => {
+                data.ItemID = data.ItemID.split('.').join('-');
+                return data;
+            });
+
+            _.forEach(vm.selectedData, (data) => {
+                var value = document.getElementById('current-' + data.ItemID);
+                value.innerHTML = data.ItemCurrentValue;
             });
         };
     }
@@ -252,6 +258,29 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 zoom.x(x);
                 zoom.y(y);
                 
+                // 마우스 이벤트 설정
+                var focus = vm.graph.svg.append("g")
+                    .attr("class", "focus")
+                    .style("display", "none");
+
+                focus.append("circle")
+                    .attr("r", 4.5);
+
+                focus.append("text")
+                    .attr("x", 9)
+                    .attr("dy", ".35em");
+
+                function mousemove() {
+                    var x0 = x.invert(d3.mouse(this)[0]);
+                    var timestamp = moment(x0).format('hh:mm:ss');
+                    var result = _.compact(_.map(vm.data, (info) => {
+                        if (info.ItemTimeStamp === timestamp) {
+                            return info;
+                        }
+                    }));
+                    vm.graph.setSelectedData(result);
+                };
+
                 vm.graph.svg.select("path.line").data([vm.data]);
                 vm.graph.draw();
 
@@ -274,7 +303,8 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .attr("class", "pane")
                     .attr("width", vm.graph.width)
                     .attr("height", vm.graph.height)
-                    .call(zoom);
+                    .call(zoom)
+                    .on("mousemove", mousemove);
 
                 var dataNest = d3.nest()
                     .key(function(d) {
