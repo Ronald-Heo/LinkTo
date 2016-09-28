@@ -43,8 +43,8 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
     {   // init
         vm.category1 = [];   // 분류1
-        vm.category2 = [];   // 분류1
-        vm.category3 = [];   // 분류1
+        vm.category2 = [];   // 분류2
+        vm.category3 = [];   // 분류3
 
         vm.data = [];   // 그래프 데이터
         vm.selectedData = [];   // 마우스 오버된 데이터
@@ -162,6 +162,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         vm.graph.width = document.getElementById("content-dashboard").offsetWidth - vm.graph.margin.left - vm.graph.margin.right;
         vm.graph.height = 500 - vm.graph.margin.top - vm.graph.margin.bottom;
 
+        vm.graph.svg = d3.select("canvers").append("svg")
+                    .attr("width", vm.graph.width + vm.graph.margin.left + vm.graph.margin.right)
+                    .attr("height", vm.graph.height + vm.graph.margin.top + vm.graph.margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + vm.graph.margin.left + "," + vm.graph.margin.top + ")");
+
         vm.graph.init = (data) => {
             return _.map(data, (info) => {
                 info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
@@ -195,11 +201,87 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 value.innerHTML = data.ItemCurrentValue;
             });
         };
+
+        var formatDate = d3.time.format("%X").parse;
+
+        var x = d3.time.scale()
+            .range([0, vm.graph.width]);
+
+        var y = d3.scale.linear()
+            .range([vm.graph.height, 0]);
+
+        vm.graph.xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        vm.graph.yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+        
+        vm.graph.line = d3.svg.line()
+            .x(function(d) {
+                return x(formatDate(d.ItemTimeStamp)); 
+            })
+            .y(function(d) { 
+                return y(d.ItemCurrentValue); 
+            })
+            .interpolate("step-after");
+        
+        // 줌 기능 초기화
+        var zoom = d3.behavior.zoom().on("zoom", vm.graph.draw); 
+
+        // 마우스 이벤트 설정
+        var focus = vm.graph.svg.append("g")
+            .attr("class", "focus")
+            .style("display", "none");
+
+        focus.append("circle")
+            .attr("r", 4.5);
+
+        focus.append("text")
+            .attr("x", 9)
+            .attr("dy", ".35em");
+
+        function mousemove() {
+            var x0 = x.invert(d3.mouse(this)[0]);
+            var timestamp = moment(x0).format('hh:mm:ss');
+            var result = _.compact(_.map(vm.data, (info) => {
+                if (info.ItemTimeStamp === timestamp) {
+                    return info;
+                }
+            }));
+            vm.graph.setSelectedData(result);
+        };
+
+        vm.graph.svg.select("path.line").data([vm.data]);
+        vm.graph.draw();
+
+        vm.graph.svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + vm.graph.height + ")")
+            .call(vm.graph.xAxis);
+
+        vm.graph.svg.append("g")
+            .attr("class", "y axis")
+            .call(vm.graph.yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Value");
+
+        vm.graph.svg.append("rect")
+            .attr("class", "pane")
+            .attr("width", vm.graph.width)
+            .attr("height", vm.graph.height)
+            .call(zoom)
+            //.on("mousemove", mousemove)
+            ;
     }
 
-    vm.search = () => {
-        console.log('search');
-        
+    vm.new = () => {
+        console.log('new');
         if (!(vm.selectedCategory1 && vm.selectedCategory2 && vm.selectedCategory3)) {
             alert('분류를 선택해주세요');
             return;
@@ -304,7 +386,8 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .attr("width", vm.graph.width)
                     .attr("height", vm.graph.height)
                     .call(zoom)
-                    .on("mousemove", mousemove);
+                    //.on("mousemove", mousemove)
+                    ;
 
                 var dataNest = d3.nest()
                     .key(function(d) {
@@ -337,19 +420,81 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                         });
                 });
 
-                function draw() {
-                    svg.select("g.x.axis").call(xAxis);
-                    svg.select("g.y.axis").call(yAxis);
-                    var dataNest = d3.nest()
-                        .key(function(d) {
-                            return d.ItemID;
-                        })
-                        .entries(vm.data);
-                    dataNest.forEach(function(d) {
-                        d.key = d.key.split('.').join('-');
-                        svg.select(`path.line-${d.key}`).attr("d", line(d.values));
+        })
+        .error((data, status, headers, config) => {
+            console.log('err');
+        });
+    };
+
+    vm.add = () => {
+        console.log('add');
+        
+        if (!(vm.selectedCategory1 && vm.selectedCategory2 && vm.selectedCategory3)) {
+            alert('분류를 선택해주세요');
+            return;
+        }
+
+        $http.get(`${config.apiServer}/apis/controllers/getControllerValues?category1=${vm.selectedCategory1}&category2=${vm.selectedCategory2}&category3=${vm.selectedCategory3}&startDate=${vm.startDate}&endDate=${vm.endDate}`)
+            .success((data, status, headers, config) => {
+                vm.data = _.concat(vm.data, vm.graph.init(data));
+                
+                x.domain(d3.extent(vm.data, 
+                    function(d) { 
+                        return formatDate(d.ItemTimeStamp);
+                    }
+                ));
+
+                y.domain(d3.extent(vm.data, 
+                    function(d) {
+                        return d.ItemCurrentValue; 
+                    }
+                ));
+
+                zoom.x(x);
+                zoom.y(y);
+
+                var dataNest = d3.nest()
+                    .key(function(d) {
+                        return d.ItemID;
+                    })
+                    .entries(vm.data);
+
+                // 초기 데이터 설정
+                dataNest.forEach(function(d) {
+                    d.visible = true;
+                    d.key = d.key.split('.').join('-');
+
+                    var duplication = _.find(vm.controllers, (controller) => {
+                        if (controller.key === d.key) {
+                            // 중복인 경우
+                            return true;
+                        }
+
+                        return false;
                     });
-                }
+
+                    if (!duplication) {
+                        vm.controllers.push(d);
+
+                        vm.graph.svg.append("path")
+                            .data(d.values)
+                            .attr("class", `line line-${d.key}`)
+                            .attr("id", `${d.key}`)
+                            .style("stroke", function() {
+                                return d.color = vm.graph.color(d.key); 
+                            })
+                            .attr("d", vm.graph.line(d.values))
+                            .transition()
+                            .duration(2000)
+                            .attrTween("stroke-dasharray", function() {
+                                var len = this.getTotalLength();
+                                return function(t) { return (d3.interpolateString("0," + len, len + ",0"))(t) };
+                            });
+                            
+                        vm.graph.draw();
+                    } 
+
+                });
         })
         .error((data, status, headers, config) => {
             console.log('err');
