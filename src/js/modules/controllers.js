@@ -358,17 +358,21 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .attr("x", 9)
                     .attr("dy", ".35em");
 
-                function mousemove() {
+                var mousemove = function() {
                     var x0 = x.invert(d3.mouse(this)[0]);
-                    var timestamp = moment(x0).format('hh:mm:ss');
+                    var timestamp = moment(x0).format('YYYY-MM-DD hh:mm:ss');
 
-                    var result = _.compact(_.map(vm.data, (info) => {
-                        if (info.ItemTimeStamp === timestamp) {
-                            return info;
-                        }
-                        return;
-                    }));
-                    vm.graph.setSelectedData(result);
+                    function run() {
+                       $http.post(`${config.apiServer}/apis/controllers/getFilterValue?time=${timestamp}`, _.map(vm.controllers, 'key'))
+                            .success(function(data, status, headers, config) {
+                                vm.graph.setSelectedData(data);
+                            })
+                            .error(function(data, status, headers, config) {
+                            });
+                    }
+                    
+                    clearTimeout(realFunction);
+                    var realFunction = setTimeout(run);
                 };
 
                 vm.graph.svg.select("path.line").data([vm.data]);
