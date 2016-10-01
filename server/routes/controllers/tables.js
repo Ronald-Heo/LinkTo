@@ -48,6 +48,16 @@ router.get('/getControllerValue', (req, res) => {
 });
 
 
+router.post('/getFilterValue', (req, res) => {
+    var itemIds = _.map(req.body, (id) => {
+        return id.split('-').join('.');
+    });
+    
+    controllers.getFilterValue('unit', itemIds, req.query.time, function(err, result) {
+        res.send(result);
+    }); 
+});
+
 /** 기본이 되는 API  */
 router.get('/controller', (req, res) => {
     console.log(req.query);

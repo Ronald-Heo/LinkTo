@@ -170,7 +170,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
         vm.graph.init = (data) => {
             return _.map(data, (info) => {
-                info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('hh:mm:ss');
+                info.ItemTimeStamp = moment(new Date(info.ItemTimeStamp)).format('YYYY-MM-DD hh:mm:ss');
                 info.ItemCurrentValue = +info.ItemCurrentValue;
                 return info;
             });
@@ -202,7 +202,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             });
         };
 
-        var formatDate = d3.time.format("%X").parse;
+        var formatDate = d3.time.format("%Y-%m-%d %X").parse;
 
         var x = d3.time.scale()
             .range([0, vm.graph.width]);
@@ -242,15 +242,21 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             .attr("x", 9)
             .attr("dy", ".35em");
 
-        function mousemove() {
+        var mousemove = function() {
             var x0 = x.invert(d3.mouse(this)[0]);
-            var timestamp = moment(x0).format('hh:mm:ss');
-            var result = _.compact(_.map(vm.data, (info) => {
-                if (info.ItemTimeStamp === timestamp) {
-                    return info;
-                }
-            }));
-            vm.graph.setSelectedData(result);
+            var timestamp = moment(x0).format('YYYY-MM-DD hh:mm:ss');
+
+            function run() {
+               $http.post(`${config.apiServer}/apis/controllers/getFilterValue?time=${timestamp}`, _.map(vm.controllers, 'key'))
+                    .success(function(data, status, headers, config) {
+                        vm.graph.setSelectedData(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                    });
+            }
+            
+            clearTimeout(realFunction);
+            var realFunction = setTimeout(run);
         };
 
         vm.graph.svg.select("path.line").data([vm.data]);
@@ -276,7 +282,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             .attr("width", vm.graph.width)
             .attr("height", vm.graph.height)
             .call(zoom)
-            //.on("mousemove", mousemove)
+            .on("mousemove", mousemove)
             ;
     }
 
@@ -291,7 +297,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             .success((data, status, headers, config) => {
                 vm.data = vm.graph.init(data);
 
-                var formatDate = d3.time.format("%X").parse;
+                var formatDate = d3.time.format("%Y-%m-%d %X").parse;
 
                 var x = d3.time.scale()
                     .range([0, vm.graph.width]);
@@ -355,10 +361,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                 function mousemove() {
                     var x0 = x.invert(d3.mouse(this)[0]);
                     var timestamp = moment(x0).format('hh:mm:ss');
+
                     var result = _.compact(_.map(vm.data, (info) => {
                         if (info.ItemTimeStamp === timestamp) {
                             return info;
                         }
+                        return;
                     }));
                     vm.graph.setSelectedData(result);
                 };
@@ -385,8 +393,8 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .attr("class", "pane")
                     .attr("width", vm.graph.width)
                     .attr("height", vm.graph.height)
+                    .on("mousemove", mousemove)
                     .call(zoom)
-                    //.on("mousemove", mousemove)
                     ;
 
                 var dataNest = d3.nest()

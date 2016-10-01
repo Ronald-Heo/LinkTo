@@ -31,6 +31,11 @@ exports.getControllerValue = (table, time, callback) => {
 	conn.query(`SELECT * FROM ${table} where ItemTimeStamp = '${time}' order by ItemTimeStamp, ItemID`, callback);
 };
 
+exports.getFilterValue = (table, names, time, callback) => {
+	var nameStr = _.join(names, `' or ItemID = '`);
+	conn.query(`SELECT * from ${table} where (ItemID = '${nameStr}') and ItemTimeStamp = '${time}'  order by ItemTimeStamp, ItemID`, callback);
+}
+
 exports.create = () => {
 	conn.query(`CREATE TABLE 'linkto'.'fic001' ('ItemID' VARCHAR(255) NULL,'ItemCurrentValue' VARCHAR(2000) NULL,'ItemTimeStamp' DATETIME NULL);`, function(err, rows, fields) {
 		if (err){
