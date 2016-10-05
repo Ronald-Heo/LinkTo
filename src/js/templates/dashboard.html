@@ -13,6 +13,10 @@
 		</header>
 		
 		<canvers id="canvers"></canvers>
+		<div id="zoom-selector">
+			<input type="checkbox" ng-model="vm.zoom.x" ng-change="vm.checkedZoom()" checked="checked">X Zoom
+			<input type="checkbox" ng-model="vm.zoom.y" ng-change="vm.checkedZoom()" checked="checked">Y Zoom
+		</div>
 	</div>
 	<div id="side-menu">
 		<div>

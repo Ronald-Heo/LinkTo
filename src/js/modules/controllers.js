@@ -57,6 +57,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         vm.startDate = new Date();
         vm.startDate.setDate(vm.startDate.getDate() - 365);
         vm.endDate = new Date();
+
+        // Zoom 선택자
+        vm.zoom = {
+            x: true,
+            y: true
+        };
     }
 
     {   // 재생기능 method
@@ -152,6 +158,28 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
 
         vm.category3Changed = () => {
         };
+    }
+
+    {   // Single Zoom
+        vm.checkedZoom = () => {
+            var zoom = d3.behavior.zoom().on("zoom", vm.graph.draw); 
+            
+            if (vm.zoom.x) {
+                zoom.x(x);
+            }
+
+            if (vm.zoom.y) {
+                zoom.y(y);
+            }
+
+            vm.graph.svg.select("rect")
+                .attr("class", "pane")
+                .attr("width", vm.graph.width)
+                .attr("height", vm.graph.height)
+                .on("mousemove", mousemove)
+                .call(zoom)
+                ;
+        }
     }
 
     {   // graph method
