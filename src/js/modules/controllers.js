@@ -122,12 +122,12 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
     
     {   // onLoaded
         $http.get(`${config.apiServer}/apis/categories/category1`)
-                .success((data, status, headers, config) => {
-                    vm.category1 = data;
-                })
-                .error((data, status, headers, config) => {
-                    
-                });
+            .success((data, status, headers, config) => {
+                vm.category1 = data;
+            })
+            .error((data, status, headers, config) => {
+                
+            });
     }
 
     {   // 카테고리 변경
@@ -160,7 +160,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         };
     }
 
-    {   // Single Zoom
+    {
         vm.checkedZoom = () => {
             var zoom = d3.behavior.zoom().on("zoom", vm.graph.draw); 
             
@@ -207,15 +207,47 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         vm.graph.draw = () => {
             vm.graph.svg.select("g.x.axis").call(vm.graph.xAxis);
             vm.graph.svg.select("g.y.axis").call(vm.graph.yAxis);
+
             var dataNest = d3.nest()
                 .key(function(d) {
                     return d.ItemID;
                 })
                 .entries(vm.data);
+
             dataNest.forEach(function(d) {
                 d.key = d.key.split('.').join('-');
-                vm.graph.svg.select(`path.line-${d.key}`).attr("d", vm.graph.line(d.values));
+                vm.graph.svg.select(`path.line-${d.key}`)
+                    .attr("d", vm.graph.line(d.values));
             });
+
+            vm.graph.svg.select("g.y.axis").remove();
+            vm.graph.svg.select("g.x.axis").remove();
+
+            vm.graph.svg.select("rect.x-hiden").remove();
+            vm.graph.svg.select("rect.y-hiden").remove();
+
+            vm.graph.svg.append("rect")
+                .attr("class", "y-hiden")
+                .attr("fill", "#ffffff")
+                .attr("width", vm.graph.margin.left)
+                .attr("height", vm.graph.height + vm.graph.margin.top + vm.graph.margin.bottom)
+                .attr("transform", "translate(" + (-vm.graph.margin.left) + ", " + (-vm.graph.margin.top) + ")");
+
+            vm.graph.svg.append("rect")
+                .attr("class", "x-hiden")
+                .attr("fill", "#ffffff")
+                .attr("width", vm.graph.width)
+                .attr("height", vm.graph.margin.top + vm.graph.margin.bottom)
+                .attr("transform", "translate(0," + vm.graph.height + ")");
+
+            vm.graph.svg.append("g")
+                .attr("class", "y axis")
+                .call(vm.graph.yAxis);
+
+            vm.graph.svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + vm.graph.height + ")")
+                .call(vm.graph.xAxis);
         };
 
         vm.graph.setSelectedData = (datas) => {
@@ -258,18 +290,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
         // 줌 기능 초기화
         var zoom = d3.behavior.zoom().on("zoom", vm.graph.draw); 
 
-        // 마우스 이벤트 설정
-        var focus = vm.graph.svg.append("g")
-            .attr("class", "focus")
-            .style("display", "none");
-
-        focus.append("circle")
-            .attr("r", 4.5);
-
-        focus.append("text")
-            .attr("x", 9)
-            .attr("dy", ".35em");
-
         var mousemove = function() {
             var x0 = x.invert(d3.mouse(this)[0]);
             var timestamp = moment(x0).format('YYYY-MM-DD hh:mm:ss');
@@ -300,6 +320,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
             .call(vm.graph.yAxis)
             .append("text")
             .attr("transform", "rotate(-90)")
+            .attr('transform', 'translate(' + [vm.graph.margin.left, vm.graph.margin.top] + ')')
             .attr("y", 6)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
@@ -371,21 +392,6 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     }
                 ));
 
-                zoom.x(x);
-                zoom.y(y);
-                
-                // 마우스 이벤트 설정
-                var focus = vm.graph.svg.append("g")
-                    .attr("class", "focus")
-                    .style("display", "none");
-
-                focus.append("circle")
-                    .attr("r", 4.5);
-
-                focus.append("text")
-                    .attr("x", 9)
-                    .attr("dy", ".35em");
-
                 var mousemove = function() {
                     var x0 = x.invert(d3.mouse(this)[0]);
                     var timestamp = moment(x0).format('YYYY-MM-DD hh:mm:ss');
@@ -416,6 +422,7 @@ controllers.controller('DashboardController', ['$q', '$state', '$http', 'FileSav
                     .call(vm.graph.yAxis)
                     .append("text")
                     .attr("transform", "rotate(-90)")
+                    .attr('transform', 'translate(' + [vm.graph.margin.left, vm.graph.margin.top] + ')')
                     .attr("y", 6)
                     .attr("dy", ".71em")
                     .style("text-anchor", "end")
